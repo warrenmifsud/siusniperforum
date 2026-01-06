@@ -1,0 +1,2899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Range Ops Portal</title>
+  <style>
+    :root{
+      --bg:#f4fff6;
+      --card:#ffffff;
+      --card2:#f7fff9;
+      --text:#123225;
+      --muted:#4f6b5b;
+      --line:#cfe8d5;
+      --accent:#2f8f55;
+      --accent2:#79d6a5;
+      --danger:#c0392b;
+      --warn:#b7791f;
+      --shadow: 0 12px 30px rgba(15, 40, 25, .10);
+      --radius: 16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans); color:var(--text);
+      background: radial-gradient(1200px 700px at 15% 0%, rgba(121,214,165,.35) 0%, transparent 55%),
+                  radial-gradient(900px 600px at 100% 10%, rgba(47,143,85,.18) 0%, transparent 55%),
+                  var(--bg);
+      min-height:100vh;
+    }
+    a{color:var(--accent); text-decoration:none}
+    .wrap{max-width:1100px; margin:0 auto; padding:28px 18px 50px}
+    .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{width:42px; height:42px; border-radius:12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow: var(--shadow);}
+    .brand h1{font-size:18px; margin:0; letter-spacing:.3px}
+    .brand small{color:var(--muted)}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background: rgba(47,143,85,.08); border:1px solid rgba(47,143,85,.20); color:var(--muted);}
+    .btn{display:inline-flex; align-items:center; justify-content:center; padding:10px 12px; border-radius:12px; border:1px solid rgba(47,143,85,.18); background: rgba(255,255,255,.90); color:var(--text); cursor:pointer; transition: transform .05s ease, background .2s ease, border-color .2s ease; user-select:none;}
+    .btn:hover{background: rgba(47,143,85,.08); border-color: rgba(47,143,85,.35)}
+    .btn:active{transform: scale(.98)}
+    .btn.primary{background: linear-gradient(135deg, rgba(47,143,85,.18), rgba(121,214,165,.20)); border-color: rgba(47,143,85,.30);}
+    .btn.danger{border-color: rgba(255,107,107,.35)}
+    .btn.danger:hover{background: rgba(255,107,107,.10)}
+    .grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;}
+    @media (max-width: 900px){.grid{grid-template-columns:1fr}}
+    .card{background: linear-gradient(180deg, rgba(255,255,255,1), rgba(247,255,249,1)); border:1px solid rgba(47,143,85,.18); border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden;}
+    .card .hd{padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid rgba(207,232,213,.85); background: rgba(47,143,85,.08);}
+    .card .hd h2{margin:0; font-size:14px; letter-spacing:.35px; text-transform:uppercase; color:var(--muted)}
+    .card .bd{padding:14px 16px}
+    .tabs{display:flex; gap:8px; flex-wrap:wrap; margin: 14px 0 16px;}
+    .tab{padding:10px 12px; border-radius:14px; border:1px solid rgba(47,143,85,.18); background: rgba(255,255,255,.88); color:var(--muted); cursor:pointer;}
+    .tab.active{background: linear-gradient(135deg, rgba(47,143,85,.14), rgba(121,214,165,.16)); border-color: rgba(47,143,85,.30); color:var(--text);}
+    .kpi{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px;}
+    @media (max-width: 520px){.kpi{grid-template-columns:1fr}}
+    .kpi .box{padding:12px; border-radius:14px; border:1px solid rgba(47,143,85,.18); background: rgba(47,143,85,.06);}
+    .kpi .label{color:var(--muted); font-size:12px}
+    .kpi .value{font-size:18px; margin-top:6px}
+    .muted{color:var(--muted)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .sp{height:10px}
+    .field{display:flex; flex-direction:column; gap:6px; margin-bottom:10px}
+    .field label{font-size:12px; color:var(--muted)}
+    input, select, textarea{width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(207,232,213,.95); background: rgba(255,255,255,.92); color:var(--text); outline:none;}
+    textarea{min-height:110px; resize:vertical}
+    input::placeholder, textarea::placeholder{color: rgba(79,107,91,.65)}
+    .table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid rgba(47,143,85,.18); border-radius:14px;}
+    .table th, .table td{padding:10px 10px; border-bottom:1px solid rgba(207,232,213,.85); text-align:left; vertical-align:top; font-size:13px;}
+    .table th{color:var(--muted); font-weight:600; background: rgba(47,143,85,.10)}
+    .table tr:last-child td{border-bottom:none}
+    .tag{display:inline-flex; padding:4px 8px; border-radius:999px; border:1px solid rgba(207,232,213,.95); background: rgba(47,143,85,.06); color:var(--muted); font-size:12px; margin-right:6px; margin-top:4px;}
+    .tag.ok{border-color: rgba(121,214,165,.35); color: rgba(47,143,85,.95)}
+    .tag.warn{border-color: rgba(255,209,102,.35); color: rgba(255,209,102,.95)}
+    .tag.bad{border-color: rgba(255,107,107,.35); color: rgba(255,107,107,.95)}
+    .hr{height:1px; background: rgba(207,232,213,.95); margin:12px 0}
+    .login-shell{max-width:420px; margin: 7vh auto 0; padding: 0 18px;}
+    .footer-note{margin-top:14px; font-size:12px; color: rgba(79,107,91,.80); line-height:1.35;}
+    .mono{font-family:var(--mono)}
+    .toast{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background: rgba(255,255,255,.95); border:1px solid rgba(47,143,85,.22); padding:10px 12px; border-radius:14px; color:var(--text); box-shadow: var(--shadow); display:none; max-width: min(680px, calc(100vw - 36px)); font-size:13px;}
+    .toast.show{display:block}
+    .checkbox{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:14px; border:1px solid rgba(47,143,85,.18); background: rgba(47,143,85,.06); margin-bottom:8px;}
+    .checkbox input{width:18px; height:18px; margin:0}
+    .small{font-size:12px; color:rgba(79,107,91,.85)}
+  
+  /* Military-style roster panel */
+  .mil-roster{
+    border: 1px solid rgba(47,143,85,.22);
+    background: linear-gradient(180deg, rgba(255,255,255,1), rgba(244,255,246,1));
+    box-shadow: 0 12px 26px rgba(15,40,25,.10);
+  }
+  .mil-roster .hd{
+    background: linear-gradient(180deg, rgba(121,214,165,.22), rgba(47,143,85,.10));
+    border-bottom: 1px solid rgba(47,143,85,.18);
+  }
+  .mil-roster h2{
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .roster-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 900px){
+    .roster-grid{ grid-template-columns: 1fr; }
+  }
+  .roster-h{
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-size: 12px;
+    opacity: .9;
+    margin: 2px 0 8px;
+  }
+  .roster-list{
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+  }
+  .roster-item{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    padding: 10px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(159, 255, 159, .14);
+    background: rgba(255,255,255,.92);
+  }
+  .role-icon{
+    width: 34px;
+    height: 34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius: 10px;
+    background: rgba(47,143,85,.10);
+    border: 1px solid rgba(47,143,85,.18);
+    font-size: 18px;
+  }
+  .roster-name{
+    flex: 1;
+    font-weight: 800;
+    letter-spacing: .04em;
+  }
+  .roster-role{
+    opacity: .9;
+  }
+
+
+/* supabase-only-hide-sheets */
+#btn_sheets, #sheets_settings, #sheets_modal, [data-tab="sheets"], .sheets, .sheet-settings { display:none !important; }
+</style>
+<script>
+    
+
+
+  <!-- Supabase (robust loader) -->
+  <script>
+    // Robustly load Supabase JS (avoids 'undefined is not an object' on slower networks)
+    (function(){
+      function loaded(){ return !!(window.supabase && window.supabase.createClient); }
+      function loadScript(src){
+        return new Promise((resolve, reject)=>{
+          var s=document.createElement('script');
+          s.src=src; s.defer=true; s.onload=()=>resolve(); s.onerror=()=>reject(new Error("Failed to load "+src));
+          document.head.appendChild(s);
+        });
+      }
+      window.__ensureSupabase = async function(){
+        if (loaded()) return true;
+        // Primary CDN
+        try{
+          await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+          if (loaded()) return true;
+        }catch(e){}
+        // Fallback CDN
+        try{
+          await loadScript("https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js");
+          if (loaded()) return true;
+        }catch(e){}
+        return false;
+      };
+    })();
+  </script>
+
+
+  <script>
+    const SUPABASE_URL = "https://fmlyoafhrfufzoycsntr.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtbHlvYWZocmZ1ZnpveWNzbnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDc1MTMsImV4cCI6MjA4MzI4MzUxM30.nG9crBrAghBJMDv8tPJRMoEXYFEisF5W-z6wnJsISMc";
+    // Supabase client (no naming collision with window.supabase library)
+    let sbClient = null;
+
+    function setLoginError(msg){
+      try{
+        const el = document.getElementById('login_error');
+        if (!el) return;
+        el.textContent = msg || '';
+        el.style.display = msg ? 'block' : 'none';
+      }catch(e){}
+    }
+    function clearLoginError(){ setLoginError(''); }
+
+
+    async function getSb(){
+      if (sbClient) return sbClient;
+      const ok = await (window.__ensureSupabase ? window.__ensureSupabase() : Promise.resolve(!!(window.supabase && window.supabase.createClient)));
+      if (!ok) throw new Error("Supabase library failed to load (check network / content blockers).");
+      sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return sbClient;
+    }
+
+    // Connectivity indicator
+    window.SUPABASE_READY = false;
+    async function supabasePing(){
+      try{
+        const sb = await getSb();
+        const { error } = await sb.auth.getSession();
+        window.SUPABASE_READY = !error;
+      }catch(e){
+        window.SUPABASE_READY = false;
+      }
+    }
+  </script>
+
+</head>
+<body>
+  <div id="app"><div class="wrap"><div class="card"><div class="hd"><h2>Loading</h2></div><div class="bd muted">Initializing…</div></div></div></div>
+  <div id="toast" class="toast"></div>
+
+<script>
+const STORAGE_KEY = "range_ops_portal_v1";
+const ROLES = ["Admin", "TL", "ATL", "Sniper Operator"]; // built-in defaults (fallback if no custom roles)
+const PERMISSIONS = [
+  { key: "view_dashboard", label: "View Dashboard" },
+  { key: "edit_range", label: "Edit Range Bookings" },
+  { key: "edit_ammo", label: "Edit Ammo Stock" },
+  { key: "edit_courses", label: "Edit Courses" },
+  { key: "edit_reminders", label: "Edit Reminders" },
+  { key: "edit_ammo_used", label: "Record Ammo Used" },
+  { key: "admin_access", label: "Admin Access" }
+];
+
+function nowISO(){ return new Date().toISOString(); }
+
+function seedIfNeeded(){
+  const existing = localStorage.getItem(STORAGE_KEY);
+  if (existing) return;
+  const seed = {
+    meta: { createdAt: nowISO(), version: 1 },
+    session: { currentUser: null, activeTab: "dashboard" },
+    roles: [
+      { name: "Admin", permissions: Object.fromEntries(PERMISSIONS.map(p=>[p.key,true])) },
+      { name: "TL", permissions: { view_dashboard: true, edit_range: true, edit_ammo_used: true } },
+      { name: "ATL", permissions: { view_dashboard: true, edit_range: true, edit_ammo_used: true } },
+      { name: "Sniper Operator", permissions: { view_dashboard: true, edit_ammo_used: true } }
+    ],
+    users: [
+      {
+        username: "warren",
+        password: "warren",
+        displayName: "Admin",
+        role: "Admin",
+        permissions: {
+          view_dashboard: true,
+          edit_range: true,
+          edit_ammo: true,
+          edit_courses: true,
+          edit_reminders: true,
+          edit_ammo_used: true,
+          admin_access: true
+        }
+      }
+    ],
+    data: { rangeBookings: [], ammoStock: [], ammoUsage: [], courses: [], reminders: [], ammoTypes: [] }
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+}
+
+// --- Supabase backend (Apps Script Web App) ---
+// --- Supabase backend (Apps Script Web App) ---
+// Configure these in the Login screen (stored locally in this browser) OR hardcode defaults below.
+const DEFAULT_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/.../exec";
+const DEFAULT_SHEETS_KEY = ""; // optional shared secret key
+
+const SHEETS_CFG_KEY = "range_ops_sheets_cfg_v1";
+function getSheetsCfg(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(SHEETS_CFG_KEY) || "null");
+    return {
+      url: String(raw?.url || DEFAULT_SHEETS_WEBAPP_URL).trim(),
+      key: String(raw?.key || DEFAULT_SHEETS_KEY).trim()
+    };
+  }catch(_){
+    return { url: DEFAULT_SHEETS_WEBAPP_URL, key: DEFAULT_SHEETS_KEY };
+  }
+}
+function setSheetsCfg(url, key){
+  const cfg = { url: String(url||"").trim(), key: String(key||"").trim() };
+  localStorage.setItem(SHEETS_CFG_KEY, JSON.stringify(cfg));
+  return cfg;
+}
+// In-memory cache to avoid re-parsing localStorage everywhere
+let STATE_CACHE = null;
+let REMOTE_READY = false;
+let REMOTE_SAVE_TIMER = null;
+
+function persistenceStatus(){
+  const st = (()=>{ try{return loadState();}catch(e){return null;} })();
+  const hasSupa = !!(st?.session?.supabase?.userId);
+  if (hasSupa && REMOTE_READY) return { label: "Supabase", note: "Synced (local cache enabled)" };
+  if (hasSupa && !REMOTE_READY) return { label: "Supabase", note: "Offline (using local cache)" };
+  return { label: "Supabase", note: "Sign in to sync" };
+}
+
+
+function fetchWithTimeout(url, options={}, ms=8000){
+  const ctrl = new AbortController();
+  const id = setTimeout(()=>ctrl.abort(), ms);
+  return fetch(url, { ...(options||{}), signal: ctrl.signal })
+    .finally(()=> clearTimeout(id));
+}
+
+// --- CORS-safe transport for Apps Script Web Apps ---
+// Apps Script web apps do not reliably send CORS headers. If you open this portal as a local file
+// (file://) or from a different origin, normal fetch() can be blocked.
+//
+// We use JSONP for GET and a hidden form+iframe for POST as a CORS-free fallback.
+function sheetsGetJSONP(route, timeoutMs=9000){
+  return new Promise((resolve, reject) => {
+    const cb = "__jsonp_cb_" + Math.random().toString(36).slice(2);
+    const { url: WEBAPP_URL, key: WEBAPP_KEY } = getSheetsCfg();
+    const url = new URL(WEBAPP_URL);
+    url.searchParams.set("route", route);
+    url.searchParams.set("callback", cb);
+    if (WEBAPP_KEY) url.searchParams.set("key", WEBAPP_KEY);
+
+    const script = document.createElement("script");
+    const timer = setTimeout(()=>{
+      cleanup();
+      reject(new Error("JSONP timeout"));
+    }, timeoutMs);
+
+    function cleanup(){
+      clearTimeout(timer);
+      try { delete window[cb]; } catch(_){ window[cb] = undefined; }
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+    }
+
+    window[cb] = (data) => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error("JSONP network error")); };
+    script.src = url.toString();
+    document.head.appendChild(script);
+  });
+}
+
+function sheetsPostForm(payload){
+  // Fire-and-forget POST via hidden form submission to an iframe (bypasses CORS).
+  return new Promise((resolve, reject) => {
+    const iframe = document.createElement("iframe");
+    iframe.name = "sheets_iframe_" + Math.random().toString(36).slice(2);
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    const { url: WEBAPP_URL, key: WEBAPP_KEY } = getSheetsCfg();
+    form.action = WEBAPP_URL;
+    form.target = iframe.name;
+    form.style.display = "none";
+
+    const add = (name, value) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    };
+
+    // Send as form-encoded so Apps Script can read from e.parameter
+    add("payload", JSON.stringify(payload || {}));
+    if (WEBAPP_KEY) add("key", WEBAPP_KEY);
+
+    const cleanup = ()=>{
+      if (form && form.parentNode) form.parentNode.removeChild(form);
+      if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    };
+
+    iframe.onload = () => { cleanup(); resolve({ ok: true }); };
+    iframe.onerror = () => { cleanup(); reject(new Error("Form POST failed")); };
+
+    document.body.appendChild(form);
+    form.submit();
+  });
+}
+
+async function sheetsGet(route){
+  // Prefer JSONP (CORS-proof). If it fails, try normal fetch.
+  try {
+    return await sheetsGetJSONP(route);
+  } catch(_){
+    const { url: WEBAPP_URL, key: WEBAPP_KEY } = getSheetsCfg();
+    const url = new URL(WEBAPP_URL);
+    url.searchParams.set("route", route);
+    if (WEBAPP_KEY) url.searchParams.set("key", WEBAPP_KEY);
+    const r = await fetchWithTimeout(url.toString(), { method: "GET" });
+    if (!r.ok) throw new Error(`Sheets GET ${route} failed (${r.status})`);
+    return r.json();
+  }
+}
+async function sheetsPost(payload){
+  // Prefer form+iframe POST (CORS-proof). If it fails, try normal fetch.
+  try {
+    return await sheetsPostForm(payload);
+  } catch(_){
+    const body = { ...(payload||{}) };
+    if (WEBAPP_KEY) body.key = WEBAPP_KEY;
+    const { url: WEBAPP_URL, key: WEBAPP_KEY } = getSheetsCfg();
+    const r = await fetchWithTimeout(WEBAPP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error(`Sheets POST failed (${r.status})`);
+    return r.json();
+  }
+}
+
+/* ================================
+   Supabase relational backend
+   Tables expected (public):
+   - profiles, user_permissions
+   - range_bookings, ammo_stock, ammo_usage, courses, reminders
+   ================================ */
+
+function hasSupabaseSession(){
+  const st = loadState();
+  return !!(st?.session?.supabase?.userId);
+}
+
+function ensureIds(state){
+  // Add stable UUIDs to items so we can upsert/delete deterministically.
+  // Uses crypto.randomUUID when available.
+  const gen = () => (crypto?.randomUUID ? crypto.randomUUID() : (Date.now().toString(16) + Math.random().toString(16).slice(2)));
+  state.data ||= {};
+  const lists = ["rangeBookings","ammoStock","ammoUsage","courses","reminders"];
+  for (const k of lists){
+    state.data[k] ||= [];
+    state.data[k].forEach(x => { if (!x.id) x.id = gen(); });
+  }
+}
+
+async function supabaseLoadAllIntoState(state){
+  // Pull from Supabase → hydrate state.data
+  ensureIds(state);
+
+  // Load profiles (for "Used by" dropdown mapping)
+  const { data: profs } = await sb.from("profiles").select("id, username, display_name, role, is_active");
+  const userMap = {};
+  (profs||[]).forEach(p => userMap[(p.username||"").toLowerCase()] = p);
+
+  // Range bookings
+  const { data: rb, error: rbErr } = await supabase
+    .from("range_bookings")
+    .select("id, booking_date, title, notes, created_at, updated_at")
+    .order("booking_date", { ascending: true });
+  if (rbErr) console.warn("range_bookings load", rbErr);
+
+  // Ammo stock
+  const { data: st, error: stErr } = await supabase
+    .from("ammo_stock")
+    .select("id, item, qty, unit, notes, created_at, updated_at")
+    .order("item", { ascending: true });
+  if (stErr) console.warn("ammo_stock load", stErr);
+
+  // Ammo usage
+  const { data: au, error: auErr } = await supabase
+    .from("ammo_usage")
+    .select("id, used_on, used_by, item, qty_used, notes, created_at")
+    .order("used_on", { ascending: true });
+  if (auErr) console.warn("ammo_usage load", auErr);
+
+  // Courses
+  const { data: co, error: coErr } = await supabase
+    .from("courses")
+    .select("id, course_date, course_name, location, notes, created_at, updated_at")
+    .order("course_date", { ascending: true });
+  if (coErr) console.warn("courses load", coErr);
+
+  // Reminders
+  const { data: rm, error: rmErr } = await supabase
+    .from("reminders")
+    .select("id, due_date, reminder_text, priority, emailed_at, created_at, updated_at")
+    .order("due_date", { ascending: true });
+  if (rmErr) console.warn("reminders load", rmErr);
+
+  // Map to portal state shape
+  state.data.rangeBookings = (rb||[]).map(x => ({
+    id: x.id,
+    date: x.booking_date,
+    title: x.title,
+    notes: x.notes || "",
+    createdAt: x.created_at || nowISO(),
+    updatedAt: x.updated_at || nowISO()
+  }));
+
+  state.data.ammoStock = (st||[]).map(x => ({
+    id: x.id,
+    item: x.item,
+    qty: Number(x.qty)||0,
+    unit: x.unit || "rounds",
+    notes: x.notes || "",
+    createdAt: x.created_at || nowISO(),
+    updatedAt: x.updated_at || nowISO()
+  }));
+
+  // usedBy username for display; store usedById for safe re-sync
+  state.data.ammoUsage = (au||[]).map(x => {
+    const prof = (profs||[]).find(p=>p.id===x.used_by);
+    return ({
+      id: x.id,
+      date: x.used_on,
+      usedBy: prof?.username || "—",
+      usedById: x.used_by,
+      item: x.item,
+      qtyUsed: Number(x.qty_used)||0,
+      unit: (state.data.ammoStock.find(s=> normItemName(s.item)===normItemName(x.item))?.unit) || "rounds",
+      notes: x.notes || "",
+      createdAt: x.created_at || nowISO(),
+      updatedAt: x.created_at || nowISO()
+    });
+  });
+
+  state.data.courses = (co||[]).map(x => ({
+    id: x.id,
+    date: x.course_date,
+    name: x.course_name,
+    location: x.location || "",
+    notes: x.notes || "",
+    createdAt: x.created_at || nowISO(),
+    updatedAt: x.updated_at || nowISO()
+  }));
+
+  state.data.reminders = (rm||[]).map(x => ({
+    id: x.id,
+    due: x.due_date,
+    text: x.reminder_text,
+    priority: x.priority || "Medium",
+    emailedAt: x.emailed_at || null,
+    createdAt: x.created_at || nowISO(),
+    updatedAt: x.updated_at || nowISO()
+  }));
+
+  // Cache profile list into local "users" list for dropdowns (no passwords)
+  // Keeps legacy UI working without touching permissions logic.
+  if (Array.isArray(profs) && profs.length){
+    const keep = new Set((state.users||[]).map(u=>u.username));
+    profs.forEach(p=>{
+      const un = (p.username||"").toLowerCase();
+      if (!un) return;
+      if (!keep.has(un)){
+        state.users.push({ username: un, password: "•", displayName: p.display_name || p.username, role: p.role || "TL", perms: {} });
+      }
+    });
+  }
+
+  state.meta ||= {};
+  state.meta.lastSyncedAt = nowISO();
+  REMOTE_READY = true;
+}
+
+async function supabaseSyncAllFromState(state){
+  // Push local state → Supabase (upsert + delete missing)
+  if (!hasSupabaseSession()) return;
+  ensureIds(state);
+
+  const userId = state.session.supabase.userId;
+
+  const listIds = (arr)=> new Set((arr||[]).map(x=>x.id).filter(Boolean));
+
+  // Range bookings
+  const rbRows = (state.data.rangeBookings||[]).map(x=>({
+    id: x.id,
+    booking_date: x.date,
+    title: x.title,
+    notes: x.notes || null,
+    created_by: userId
+  }));
+  await sb.from("range_bookings").upsert(rbRows, { onConflict: "id" });
+
+  // Ammo stock
+  const stockRows = (state.data.ammoStock||[]).map(x=>({
+    id: x.id,
+    item: x.item,
+    qty: Number(x.qty)||0,
+    unit: x.unit || "rounds",
+    notes: x.notes || null,
+    updated_by: userId
+  }));
+  await sb.from("ammo_stock").upsert(stockRows, { onConflict: "id" });
+
+  // Ammo usage: store used_by as selected profile id if available; otherwise current user
+  const unameToId = {};
+  // best-effort load from cached session profile list
+  try{
+    const { data: profs } = await sb.from("profiles").select("id, username");
+    (profs||[]).forEach(p=> unameToId[(p.username||"").toLowerCase()] = p.id);
+  }catch(e){}
+
+  const usageRows = (state.data.ammoUsage||[]).map(x=>({
+    id: x.id,
+    used_on: x.date,
+    used_by: x.usedById || unameToId[(x.usedBy||"").toLowerCase()] || userId,
+    item: x.item,
+    qty_used: Number(x.qtyUsed)||0,
+    notes: x.notes || null
+  }));
+  // Insert/upsert usage rows (trigger will deduct stock on insert; if you edit existing entries, your DB should handle it separately)
+  // We use upsert by id; if row exists and qty changes, the current DB trigger (insert-only) won't re-adjust stock.
+  // For now: safest is to only upsert NEW rows. We'll do: insert on conflict do nothing.
+  if (usageRows.length){
+    await sb.from("ammo_usage").upsert(usageRows, { onConflict: "id" });
+  }
+
+  // Courses
+  const courseRows = (state.data.courses||[]).map(x=>({
+    id: x.id,
+    course_date: x.date,
+    course_name: x.name,
+    location: x.location || null,
+    notes: x.notes || null,
+    created_by: userId
+  }));
+  await sb.from("courses").upsert(courseRows, { onConflict: "id" });
+
+  // Reminders
+  const remRows = (state.data.reminders||[]).map(x=>({
+    id: x.id,
+    due_date: x.due,
+    reminder_text: x.text,
+    priority: x.priority || "Medium",
+    created_by: userId,
+    emailed_at: x.emailedAt || null
+  }));
+  await sb.from("reminders").upsert(remRows, { onConflict: "id" });
+
+  // Delete missing rows (optional but expected for true sync)
+  // We only delete if user is admin in-session (prevents accidental destructive sync).
+  const isAdmin = !!(state.session?.permissions?.admin_access);
+
+  if (isAdmin){
+    // Range
+    const { data: rbAll } = await sb.from("range_bookings").select("id");
+    const wantRB = listIds(state.data.rangeBookings);
+    const delRB = (rbAll||[]).map(x=>x.id).filter(id=>!wantRB.has(id));
+    if (delRB.length) await sb.from("range_bookings").delete().in("id", delRB);
+
+    // Stock
+    const { data: stAll } = await sb.from("ammo_stock").select("id");
+    const wantST = listIds(state.data.ammoStock);
+    const delST = (stAll||[]).map(x=>x.id).filter(id=>!wantST.has(id));
+    if (delST.length) await sb.from("ammo_stock").delete().in("id", delST);
+
+    // Courses
+    const { data: coAll } = await sb.from("courses").select("id");
+    const wantCO = listIds(state.data.courses);
+    const delCO = (coAll||[]).map(x=>x.id).filter(id=>!wantCO.has(id));
+    if (delCO.length) await sb.from("courses").delete().in("id", delCO);
+
+    // Reminders
+    const { data: rmAll } = await sb.from("reminders").select("id");
+    const wantRM = listIds(state.data.reminders);
+    const delRM = (rmAll||[]).map(x=>x.id).filter(id=>!wantRM.has(id));
+    if (delRM.length) await sb.from("reminders").delete().in("id", delRM);
+
+    // Ammo usage: deletions are admin-only too
+    const { data: auAll } = await sb.from("ammo_usage").select("id");
+    const wantAU = listIds(state.data.ammoUsage);
+    const delAU = (auAll||[]).map(x=>x.id).filter(id=>!wantAU.has(id));
+    if (delAU.length) await sb.from("ammo_usage").delete().in("id", delAU);
+  }
+
+  state.meta ||= {};
+  state.meta.lastSyncedAt = nowISO();
+  REMOTE_READY = true;
+}
+
+
+
+async function supabaseBootstrapIfSignedIn(){
+  try{
+    const { data } = await sb.auth.getSession();
+    const sess = data?.session;
+    if (!sess?.user) return;
+
+    const userId = sess.user.id;
+
+    const { data: prof } = await sb
+      .from("profiles")
+      .select("id, username, display_name, role, is_active")
+      .eq("id", userId)
+      .single();
+
+    if (!prof || prof.is_active === false) return;
+
+    const { data: perms } = await sb
+      .from("user_permissions")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    const st = loadState();
+    st.session.currentUser = prof.username;
+    st.session.supabase = { userId, email: sess.user.email || "" };
+    st.session.profile = prof;
+    st.session.permissions = perms || null;
+
+    await supabaseLoadAllIntoState(st);
+    saveState(st);
+    toast("Synced from Supabase.");
+    render();
+  }catch(e){
+    console.warn("Supabase bootstrap failed", e);
+  }
+}
+
+async function bootstrapRemoteState(){
+  // 1) Ensure local seed exists
+  seedIfNeeded();
+
+  // If Sheets URL isn't configured yet, don't block startup.
+  const cfg = getSheetsCfg();
+  if (!cfg.url || cfg.url.includes(".../exec")){
+    try{
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      const st = normalizeRoles(raw || {});
+      STATE_CACHE = st;
+    }catch(_){
+      STATE_CACHE = loadState();
+    }
+    REMOTE_READY = false;
+    return;
+  }
+
+  // 2) Try load state from Sheets (if Apps Script supports it)
+  try {
+    const remote = await sheetsGet("state");
+    if (remote && remote.state){
+      const st = normalizeRoles(remote.state);
+      STATE_CACHE = st;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+      REMOTE_READY = true;
+      return;
+    }
+  } catch (e){
+    // If route not implemented yet, we'll fall back to local and still render.
+    console.warn("Sheets state load failed, using local cache.", e);
+  }
+
+  // 3) Fall back to local; try to publish it once (best-effort)
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    const st = normalizeRoles(raw || {});
+    STATE_CACHE = st;
+    // Try to save for next load
+    await sheetsPost({ route: "state:save", state: st });
+    REMOTE_READY = true;
+  } catch (e){
+    console.warn("Sheets state save failed (still running local).", e);
+    REMOTE_READY = false;
+  }
+}
+
+function loadState(){
+  if (STATE_CACHE) return STATE_CACHE;
+
+  seedIfNeeded();
+  const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  const before = JSON.stringify(raw?.roles || null);
+  const st = normalizeRoles(raw || {});
+  const after = JSON.stringify(st?.roles || null);
+
+  // Persist role migrations once (keeps future loads consistent)
+  if (before !== after) localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+
+  STATE_CACHE = st;
+  return st;
+}
+
+function saveState(state){
+  STATE_CACHE = state;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  // Debounced remote save (best-effort)
+  if (REMOTE_SAVE_TIMER) clearTimeout(REMOTE_SAVE_TIMER);
+  REMOTE_SAVE_TIMER = setTimeout(async ()=>{
+    try {
+      const st = loadState();
+      if (!st?.session?.supabase?.userId){ REMOTE_READY = false; return; }
+      await supabaseSyncAllFromState(state);
+      REMOTE_READY = true;
+    } catch (e){
+      console.warn("Remote save failed (cached locally).", e);
+      REMOTE_READY = false;
+    }
+  }, 450);
+}
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> el.classList.remove("show"), 2200);
+}
+function sanitizeStr(s){ return String(s ?? "").trim(); }
+function isISODate(s){ return /^\\d{4}-\\d{2}-\\d{2}$/.test(s); }
+function escapeHtml(str){
+  return String(str ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+function getCurrentUser(state){
+  const u = state.session.currentUser;
+  if (!u) return null;
+  return state.users.find(x => x.username === u) || null;
+}
+function hasPerm(user, permKey){ return !!(user?.permissions && user.permissions[permKey]); }
+
+function normalizeRoles(state){
+  // Supports old saves (no roles) and new saves (state.roles = [{name, permissions}]).
+  state.roles ||= [];
+  // Convert legacy string array to objects
+  if (state.roles.length && typeof state.roles[0] === "string"){
+    state.roles = state.roles.map(name => ({ name: sanitizeStr(name), permissions: {} }));
+  }
+  // Ensure role objects are well-formed
+  state.roles = (state.roles || []).map(r => ({
+    name: sanitizeStr(r?.name),
+    permissions: (r?.permissions && typeof r.permissions === "object") ? r.permissions : {}
+  })).filter(r => r.name);
+
+  const names = new Set(state.roles.map(r=>r.name));
+
+  // Add built-in roles if missing
+  ROLES.forEach(name=>{
+    if (!names.has(name)){
+      state.roles.push({ name, permissions: {} });
+      names.add(name);
+    }
+  });
+
+  // Ensure Admin role has full permissions by default (template only)
+  const admin = state.roles.find(r=>r.name === "Admin");
+  if (admin){
+    const empty = !admin.permissions || Object.keys(admin.permissions).length === 0;
+    if (empty){
+      admin.permissions = Object.fromEntries(PERMISSIONS.map(p=>[p.key, true]));
+    }
+  }
+
+  // If users have roles not in the list, keep them (prevents breaking older data)
+  (state.users || []).forEach(u=>{
+    const rn = sanitizeStr(u?.role);
+    if (rn && !names.has(rn)){
+      state.roles.push({ name: rn, permissions: {} });
+      names.add(rn);
+    }
+  });
+
+  return state;
+}
+
+function getRoleNames(state){
+  normalizeRoles(state);
+  return (state.roles || []).map(r=>r.name).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+}
+function getRoleByName(state, name){
+  normalizeRoles(state);
+  const n = sanitizeStr(name);
+  return (state.roles || []).find(r=>r.name === n) || null;
+}
+
+function roleIcon(roleName){
+  const r = String(roleName || "").trim().toLowerCase();
+  if (!r) return "◼";
+  if (r.includes("admin")) return "🛡️";
+  if (r.includes("super")) return "⭐";
+  if (r.includes("range")) return "🎯";
+  if (r.includes("officer")) return "🎖️";
+  if (r.includes("operator")) return "🧰";
+  if (r.includes("guest") || r.includes("viewer") || r.includes("read")) return "👁️";
+  return "◼";
+}
+
+function fmtDate(s){
+  if (!s) return "—";
+  if (!isISODate(s)) return s;
+  const [y,m,d] = s.split("-").map(n=>parseInt(n,10));
+  const dt = new Date(Date.UTC(y, m-1, d));
+  return dt.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+}
+function deriveAmmoStatus(qty){
+  const n = Number(qty);
+  if (!Number.isFinite(n)) return { label:"Unknown", cls:"warn" };
+  if (n <= 0) return { label:"Empty", cls:"bad" };
+  if (n < 200) return { label:"Low", cls:"warn" };
+  return { label:"OK", cls:"ok" };
+}
+function mount(html){ document.getElementById("app").innerHTML = html; }
+function render(){
+  const state = loadState();
+  const user = getCurrentUser(state);
+  if (!user){ renderLogin(); return; }
+  renderPortal(state, user);
+}
+
+function renderLogin(){
+  const ps = persistenceStatus();
+  mount(`
+    <div class="login-shell">
+      <div class="card">
+        <div class="hd">
+          <div class="brand">
+            <div class="logo"></div>
+            <div>
+              <h1>Range Ops Portal</h1>
+              <small><span class="pill">${ps.label}</span> <span class="muted">${ps.note}</span></small>
+            </div>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="field">
+            <label>Username</label>
+            <input id="lg_user" placeholder="Enter username" autocomplete="username" />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input id="lg_pass" type="password" placeholder="Enter password" autocomplete="current-password" />
+          <div id="login_error" class="small" style="display:none; margin-top:10px; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background: rgba(255,0,0,.08);"></div>
+</div>
+          <div class="row" style="justify-content:space-between;">
+            <button class="btn primary" id="lg_btn">Log in</button>
+            <button class="btn" id="lg_reset" title="Clear local data & reseed">Reset Portal Data</button>
+          </div>
+          <div class="footer-note">
+          <div class="hr"></div>
+          <div class="field">
+            <label>Supabase Web App URL (ends with /exec)</label>
+            <input id="cfg_url" placeholder="https://script.google.com/macros/s/.../exec" />
+          </div>
+          <div class="field">
+            <label>Sheets Key (optional)</label>
+            <input id="cfg_key" placeholder="(leave blank if not used)" />
+          </div>
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn" id="cfg_save">Save Sheets Settings</button>
+          </div>
+          <div class="sp"></div>
+          <div class="small muted">Tip: If you don’t set this, the portal will stay in Offline mode.</div>
+
+          <div class="sp"></div>
+          <div class="hr"></div>
+        </div>
+      </div>
+    </div>
+  `);
+
+  document.getElementById("lg_btn").onclick = async () => {
+    clearLoginError();
+    const email = sanitizeStr(document.getElementById("lg_user").value).toLowerCase();
+    const p = sanitizeStr(document.getElementById("lg_pass").value);
+
+    const looksEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!looksEmail){
+      toast("Use your Supabase email address to sign in.");
+      return;
+    }
+
+    try{
+      const sb = await getSb();
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: p });
+      if (error) { toast("Login failed: " + error.message); return; }
+
+      const userId = data.user.id;
+
+      const { data: prof, error: pErr } = await sb
+        .from("profiles")
+        .select("id, username, display_name, role, is_active")
+        .eq("id", userId)
+        .single();
+
+      if (pErr || !prof){
+        setLoginError("Login ok, but profile not found in DB (table: profiles). Create a profiles row where profiles.id = auth.users.id."); toast("Profile not found in DB.");
+        return;
+      }
+      if (prof.is_active === false){
+        setLoginError("Account disabled (profiles.is_active = false)."); toast("Account disabled.");
+        return;
+      }
+
+      const { data: perms } = await sb
+        .from("user_permissions")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      const state = loadState();
+      state.session.currentUser = prof.username;
+      state.session.supabase = { userId, email };
+      state.session.profile = prof;
+      state.session.permissions = perms || null;
+
+      await supabaseLoadAllIntoState(state);
+      saveState(state);
+
+      toast("Welcome, " + (prof.display_name || prof.username) + "!");
+      render();
+    } catch(e){ console.warn("Login exception", e); const msg = "Login failed (exception): " + (e?.message || JSON.stringify(e)); setLoginError(msg); toast(msg); }
+  };
+
+  document.getElementById("lg_reset").onclick = () => {
+    if (!confirm("This will clear ALL portal data stored in this browser and restore defaults. Continue?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    seedIfNeeded();
+    toast("Portal data reset.");
+    render();
+  };
+
+  // Sheets backend settings
+  try{
+    const cfg = getSheetsCfg();
+    const urlEl = document.getElementById("cfg_url");
+    const keyEl = document.getElementById("cfg_key");
+    if (urlEl) urlEl.value = cfg.url || "";
+    if (keyEl) keyEl.value = cfg.key || "";
+
+    const saveBtn = document.getElementById("cfg_save");
+    if (saveBtn){
+      saveBtn.onclick = async () => {
+        const u = sanitizeStr(urlEl?.value || "");
+        const k = sanitizeStr(keyEl?.value || "");
+        if (!u || !u.includes("/exec")){
+          toast("Please paste a valid Web App URL ending with /exec.");
+          return;
+        }
+        setSheetsCfg(u, k);
+        toast("Saved Sheets settings. Syncing…");
+        // Try bootstrap immediately
+        STATE_CACHE = null;
+        await supabasePing();
+    await supabaseBootstrapIfSignedIn();
+        render();
+      };
+    }
+  }catch(e){
+    console.warn("Sheets settings UI init failed", e);
+  }
+
+}
+
+function renderPortal(state, user){
+  const canView = hasPerm(user, "view_dashboard") || hasPerm(user, "admin_access");
+  if (!canView){
+    mount(`
+      <div class="wrap">
+        <div class="card">
+          <div class="hd">
+            <div class="brand">
+              <div class="logo"></div>
+              <div>
+                <h1>Range Ops Portal</h1>
+                <small>Signed in as <span class="mono">${escapeHtml(user.username)}</span></small>
+              </div>
+            </div>
+            <button class="btn" id="logout">Log out</button>
+          </div>
+          <div class="bd">
+            <p>You are signed in, but you do not have permission to view the dashboard.</p>
+            <p class="muted">Ask an admin to grant you <span class="mono">View Dashboard</span>.</p>
+          </div>
+        </div>
+      </div>
+    `);
+    document.getElementById("logout").onclick = logout;
+    return;
+  }
+
+  const tabs = [
+    { id:"dashboard", label:"Dashboard", show:true },
+    { id:"range", label:"Range Bookings", show:true },
+    { id:"ammo", label:"Ammo Stock", show:true },
+    { id:"ammo_used", label:"Ammo Used", show:true },
+    { id:"courses", label:"Courses", show:true },
+    { id:"reminders", label:"Reminders", show:true },
+    { id:"admin", label:"Admin", show: hasPerm(user, "admin_access") }
+  ].filter(t => t.show);
+
+  const active = state.session.activeTab || "dashboard";
+  const safeActive = tabs.some(t=>t.id===active) ? active : "dashboard";
+
+  mount(`
+    <div class="wrap">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo"></div>
+          <div>
+            <h1>Range Ops Portal</h1>
+            <small>Signed in as <span class="mono">${escapeHtml(user.username)}</span> ·
+              <span class="pill">Role: <b style="color:var(--text)">${escapeHtml(user.role || "—")}</b></span>
+            </small>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn" id="exportBtn" title="Export all portal data as JSON">Export JSON</button>
+          <button class="btn" id="importBtn" title="Import a previously exported JSON backup">Import JSON</button>
+          <button class="btn" id="logout">Log out</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        ${tabs.map(t => `<div class="tab ${t.id===safeActive ? "active":""}" data-tab="${t.id}">${t.label}</div>`).join("")}
+      </div>
+
+      <div id="view"></div>
+    </div>
+  `);
+
+  document.querySelectorAll(".tab").forEach(el=>{
+    el.onclick = () => {
+      const tab = el.getAttribute("data-tab");
+      const st = loadState();
+      st.session.activeTab = tab;
+      saveState(st);
+      render();
+    };
+  });
+
+  document.getElementById("logout").onclick = logout;
+
+  document.getElementById("exportBtn").onclick = () => {
+    const st = loadState();
+    const backup = { exportedAt: nowISO(), meta: st.meta, users: st.users, data: st.data };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `range_ops_portal_backup_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+    toast("Exported JSON backup.");
+  };
+
+  document.getElementById("importBtn").onclick = async () => {
+    const file = await pickFile(".json,application/json");
+    if (!file) return;
+    try{
+      const backup = JSON.parse(await file.text());
+      if (!backup?.data || !backup?.users){ toast("Invalid backup format."); return; }
+      const st = loadState();
+      const current = st.session.currentUser;
+      st.users = backup.users;
+      st.data = backup.data;
+      st.meta = backup.meta || st.meta;
+      st.meta.importedAt = nowISO();
+      st.session.currentUser = (current && st.users.some(u=>u.username===current)) ? current : null;
+      saveState(st);
+      toast("Imported backup.");
+      render();
+    }catch(e){
+      console.error(e);
+      toast("Import failed: " + e.message);
+    }
+  };
+
+  const viewEl = document.getElementById("view");
+  switch(safeActive){
+    case "dashboard": viewEl.innerHTML = renderDashboard(state, user); wireDashboard(state, user); break;
+    case "range": viewEl.innerHTML = renderRange(state, user); wireRange(state, user); break;
+    case "ammo": viewEl.innerHTML = renderAmmo(state, user); wireAmmo(state, user); break;
+    case "ammo_used": viewEl.innerHTML = renderAmmoUsed(state, user); wireAmmoUsed(state, user); break;
+    case "courses": viewEl.innerHTML = renderCourses(state, user); wireCourses(state, user); break;
+    case "reminders": viewEl.innerHTML = renderReminders(state, user); wireReminders(state, user); break;
+    case "admin": viewEl.innerHTML = renderAdmin(state, user); wireAdmin(state, user); break;
+  }
+}
+
+function logout(){
+  const st = loadState();
+  st.session.currentUser = null;
+  saveState(st);
+  render();
+}
+function pickFile(accept){
+  return new Promise((resolve)=>{
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = accept || "";
+    inp.onchange = () => resolve(inp.files && inp.files[0] ? inp.files[0] : null);
+    inp.click();
+  });
+}
+
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 800);
+}
+
+/* Dashboard */
+function renderMiniList(items, lineFn){
+  if (!items?.length) return `<div class="small muted" style="margin-top:8px">—</div>`;
+  return `<div style="margin-top:8px">${items.map(x=> `<div class="small" style="padding:6px 0; border-bottom:1px solid rgba(207,232,213,.95)">${lineFn(x)}</div>`).join("")}</div>`;
+}
+function renderDashboard(state, user){
+  const rb = state.data.rangeBookings || [];
+  const ammo = state.data.ammoStock || [];
+  const courses = state.data.courses || [];
+  const rem = state.data.reminders || [];
+  normalizeRoles(state);
+  const users = (state.users || []).slice().sort((a,b)=> (a.displayName||a.username||"").localeCompare(b.displayName||b.username||""));
+  const roles = (state.roles || []).slice().sort((a,b)=> (a.name||"").localeCompare(b.name||""));
+
+  const ammoTotal = ammo.reduce((s,x)=> s + (Number(x.qty)||0), 0);
+  const nextBooking = rb.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""))[0];
+  const nextCourse = courses.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""))[0];
+  const dueReminder = rem.slice().sort((a,b)=> (a.due||"").localeCompare(b.due||""))[0];
+
+  return `
+    <div class="grid">
+      <div class="card">
+        <div class="hd">
+          <h2>Main Dashboard</h2>
+          <div class="pill">Created: <span class="mono">${escapeHtml(state.meta?.createdAt || "—")}</span></div>
+        </div>
+        <div class="bd">
+          <div class="kpi">
+            <div class="box">
+              <div class="label">Next range booking</div>
+              <div class="value">${nextBooking ? `${fmtDate(nextBooking.date)} · ${escapeHtml(nextBooking.title || "Booking")}` : "—"}</div>
+              <div class="muted">${nextBooking ? escapeHtml(nextBooking.notes || "") : "No range bookings yet."}</div>
+            </div>
+            <div class="box">
+              <div class="label">Ammo stock total (all items)</div>
+              <div class="value">${Number.isFinite(ammoTotal) ? ammoTotal.toLocaleString() : "—"}</div>
+              <div class="muted">${ammo.length ? `${ammo.length} item(s) tracked` : "No ammo items yet."}</div>
+            </div>
+            <div class="box">
+              <div class="label">Next course</div>
+              <div class="value">${nextCourse ? `${fmtDate(nextCourse.date)} · ${escapeHtml(nextCourse.course || "Course")}` : "—"}</div>
+              <div class="muted">${nextCourse ? escapeHtml(nextCourse.location || "") : "No courses scheduled yet."}</div>
+            </div>
+            <div class="box">
+              <div class="label">Next reminder</div>
+              <div class="value">${dueReminder ? `${fmtDate(dueReminder.due)} · ${escapeHtml(dueReminder.text || "Reminder")}` : "—"}</div>
+              <div class="muted">${dueReminder ? `Priority: ${escapeHtml(dueReminder.priority||"—")}` : "No reminders yet."}</div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row" style="justify-content:space-between;">
+            <div class="muted">Quick links to input tabs</div>
+            <div class="row">
+              ${hasPerm(user,"edit_range") ? `<button class="btn" data-goto="range">Add booking</button>` : ""}
+              ${hasPerm(user,"edit_ammo") ? `<button class="btn" data-goto="ammo">Update ammo</button>` : ""}
+              ${hasPerm(user,"edit_courses") ? `<button class="btn" data-goto="courses">Add course</button>` : ""}
+              ${hasPerm(user,"edit_reminders") ? `<button class="btn" data-goto="reminders">Add reminder</button>` : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <h2>At a glance</h2>
+          <div class="pill">Perms: <span class="mono">${Object.entries(user.permissions||{}).filter(([k,v])=>v).map(([k])=>k).join(", ") || "none"}</span></div>
+        </div>
+        <div class="bd">
+          <div class="muted">Range bookings</div>
+          ${renderMiniList(rb.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||"")).slice(0,5), (x)=> `${fmtDate(x.date)} · ${escapeHtml(x.title||"Booking")}`)}
+          <div class="sp"></div>
+          <div class="muted">Ammo items</div>
+          ${renderMiniList(ammo.slice(0,6), (x)=> {
+            const st = deriveAmmoStatus(x.qty);
+            return `${escapeHtml(x.item||"Ammo")} · <span class="tag ${st.cls}">${st.label}</span> <span class="muted">${escapeHtml(String(x.qty ?? "—"))} ${escapeHtml(x.unit||"")}</span>`;
+          })}
+          <div class="sp"></div>
+          <div class="muted">Courses</div>
+          ${renderMiniList(courses.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||"")).slice(0,5), (x)=> `${fmtDate(x.date)} · ${escapeHtml(x.course||"Course")}`)}
+          <div class="sp"></div>
+          <div class="muted">Reminders</div>
+          ${renderMiniList(rem.slice().sort((a,b)=> (a.due||"").localeCompare(b.due||"")).slice(0,5), (x)=> `${fmtDate(x.due)} · ${escapeHtml(x.text||"Reminder")}`)}
+        </div>
+      </div>
+      <div class="card mil-roster">
+        <div class="hd">
+          <h2>Roster</h2>
+          <div class="pill">${users.length} operator(s) · ${roles.length} role(s)</div>
+        </div>
+        <div class="bd">
+          <div class="roster-grid">
+            <div>
+              <div class="roster-h">Operators</div>
+              <div class="roster-list">
+                ${users.length ? users.map(u=>{
+                  const dn = escapeHtml(u.displayName || u.username || "User");
+                  const rn = escapeHtml(u.role || "—");
+                  return `<div class="roster-item">
+                    <span class="role-icon" title="${rn}">${roleIcon(u.role)}</span>
+                    <span class="roster-name">${dn}</span>
+                    <span class="roster-role mono">${rn}</span>
+                  </div>`;
+                }).join("") : `<div class="muted">No users found.</div>`}
+              </div>
+            </div>
+            <div>
+              <div class="roster-h">Roles</div>
+              <div class="roster-list">
+                ${roles.length ? roles.map(r=>{
+                  const rn = escapeHtml(r.name || "Role");
+                  const permCount = Object.entries(r.permissions||{}).filter(([k,v])=>!!v).length;
+                  return `<div class="roster-item">
+                    <span class="role-icon" title="${rn}">${roleIcon(r.name)}</span>
+                    <span class="roster-name">${rn}</span>
+                    <span class="roster-role mono">${permCount} perm${permCount===1?"":"s"}</span>
+                  </div>`;
+                }).join("") : `<div class="muted">No roles defined.</div>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+function wireDashboard(){
+  document.querySelectorAll("[data-goto]").forEach(btn=>{
+    btn.onclick = () => {
+      const tab = btn.getAttribute("data-goto");
+      const st = loadState();
+      st.session.activeTab = tab;
+      saveState(st);
+      render();
+    };
+  });
+}
+
+/* Range */
+function renderRange(state, user){
+  const canEdit = hasPerm(user,"edit_range") || hasPerm(user,"admin_access");
+  const rb = state.data.rangeBookings || [];
+  const sorted = rb.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+
+  return `
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h2>Range booking dates</h2><div class="pill">${sorted.length} booking(s)</div></div>
+        <div class="bd">
+          ${sorted.length ? `
+            <table class="table">
+              <thead><tr><th>Date</th><th>Title</th><th>Notes</th><th style="width:140px">Actions</th></tr></thead>
+              <tbody>
+                ${sorted.map((x,idx)=> `
+                  <tr>
+                    <td class="mono">${escapeHtml(x.date||"—")}</td>
+                    <td>${escapeHtml(x.title||"")}</td>
+                    <td class="muted">${escapeHtml(x.notes||"")}</td>
+                    <td>
+                      ${canEdit ? `<button class="btn" data-edit-range="${idx}">Edit</button> <button class="btn danger" data-del-range="${idx}">Delete</button>` : `<span class="muted small">Read-only</span>`}
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          ` : `<p class="muted">No range bookings yet.</p>`}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h2>${canEdit ? "Add / edit booking" : "No edit permission"}</h2><div class="pill">${canEdit ? "Input tab" : "Read-only"}</div></div>
+        <div class="bd">
+          ${canEdit ? `
+            <div class="field"><label>Date (YYYY-MM-DD)</label><input id="range_date" type="date" /></div>
+            <div class="field"><label>Title</label><input id="range_title" placeholder="Zeroing / Qualification / Training…" /></div>
+            <div class="field"><label>Notes</label><textarea id="range_notes" placeholder="Range, time, instructors, special notes…"></textarea></div>
+            <div class="row">
+              <button class="btn primary" id="range_save">Save</button>
+              <button class="btn" id="range_clear">Clear</button>
+              <span class="muted small" id="range_mode">Mode: Add</span>
+            </div>
+          ` : `<p class="muted">You don’t have permission to edit range bookings.</p>`}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function wireRange(state, user){
+  const canEdit = hasPerm(user,"edit_range") || hasPerm(user,"admin_access");
+  if (!canEdit) return;
+  let editIndex = null;
+  const setMode = ()=> document.getElementById("range_mode").textContent = "Mode: " + (editIndex===null ? "Add" : "Edit #" + (editIndex+1));
+  const fill = (x)=>{ document.getElementById("range_date").value=x?.date||""; document.getElementById("range_title").value=x?.title||""; document.getElementById("range_notes").value=x?.notes||""; };
+
+  document.getElementById("range_save").onclick = () => {
+    const date = sanitizeStr(document.getElementById("range_date").value);
+    const title = sanitizeStr(document.getElementById("range_title").value);
+    const notes = sanitizeStr(document.getElementById("range_notes").value);
+    
+
+    const st = loadState();
+    st.data.rangeBookings ||= [];
+    const entry = { date, title, notes, updatedAt: nowISO() };
+
+    if (editIndex === null){
+      entry.createdAt = nowISO();
+      st.data.rangeBookings.push(entry);
+      toast("Booking added.");
+    } else {
+      const sorted = st.data.rangeBookings.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const target = sorted[editIndex];
+      const actual = st.data.rangeBookings.indexOf(target);
+      if (actual >= 0) st.data.rangeBookings[actual] = { ...target, ...entry, createdAt: target.createdAt || nowISO() };
+      toast("Booking updated.");
+    }
+    st.meta.lastSavedAt = nowISO();
+    saveState(st);
+    editIndex = null;
+    render();
+  };
+
+  document.getElementById("range_clear").onclick = () => { editIndex=null; fill(null); setMode(); };
+
+  document.querySelectorAll("[data-edit-range]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-edit-range"));
+      const st = loadState();
+      const sorted = (st.data.rangeBookings||[]).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const x = sorted[idx]; if (!x) return;
+      editIndex = idx; fill(x); setMode(); toast("Editing booking #" + (idx+1));
+    };
+  });
+  document.querySelectorAll("[data-del-range]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-del-range"));
+      if (!confirm("Delete this booking?")) return;
+      const st = loadState();
+      const sorted = (st.data.rangeBookings||[]).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const target = sorted[idx];
+      const actual = (st.data.rangeBookings||[]).indexOf(target);
+      if (actual >= 0){ st.data.rangeBookings.splice(actual,1); saveState(st); toast("Booking deleted."); render(); }
+    };
+  });
+setMode();
+}
+
+/* Ammo */
+function renderAmmo(state, user){
+  const canEdit = hasPerm(user,"edit_ammo") || hasPerm(user,"admin_access");
+  const items = state.data.ammoStock || [];
+  return `
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h2>Ammo stock left</h2><div class="pill">${items.length} item(s)</div></div>
+        <div class="bd">
+          ${items.length ? `
+            <table class="table">
+              <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Status</th><th>Notes</th><th style="width:140px">Actions</th></tr></thead>
+              <tbody>
+                ${items.map((x,i)=> {
+                  const st = deriveAmmoStatus(x.qty);
+                  return `
+                    <tr>
+                      <td>${escapeHtml(x.item||"")}</td>
+                      <td class="mono">${escapeHtml(String(x.qty ?? ""))}</td>
+                      <td class="muted">${escapeHtml(x.unit||"")}</td>
+                      <td><span class="tag ${st.cls}">${st.label}</span></td>
+                      <td class="muted">${escapeHtml(x.notes||"")}</td>
+                      <td>
+                        ${canEdit ? `<button class="btn" data-edit-ammo="${i}">Edit</button> <button class="btn danger" data-del-ammo="${i}">Delete</button>` : `<span class="muted small">Read-only</span>`}
+                      </td>
+                    </tr>
+                  `;
+                }).join("")}
+              </tbody>
+            </table>
+          ` : `<p class="muted">No ammo items yet.</p>`}
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>${canEdit ? "Add / edit ammo item" : "No edit permission"}</h2><div class="pill">${canEdit ? "Input tab" : "Read-only"}</div></div>
+        <div class="bd">
+          ${canEdit ? `
+            <div class="field"><label>Item</label><select id="ammo_item"></select></div>
+            <div class="field"><label>Quantity</label><input id="ammo_qty" type="number" placeholder="0" /></div>
+            <div class="field"><label>Unit</label><input id="ammo_unit" placeholder="rounds" /></div>
+            <div class="field"><label>Notes</label><textarea id="ammo_notes" placeholder="Batch, location, expiry, etc…"></textarea></div>
+            <div class="row">
+              <button class="btn primary" id="ammo_save">Save</button>
+              <button class="btn" id="ammo_clear">Clear</button>
+              <span class="muted small" id="ammo_mode">Mode: Add</span>
+            </div>
+          ` : `<p class="muted">You don’t have permission to edit ammo stock.</p>`}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function wireAmmo(state, user){
+  const canEdit = hasPerm(user,"edit_ammo") || hasPerm(user,"admin_access");
+  if (!canEdit) return;
+  // Populate ammo item dropdown from Admin > Ammo Types
+  const itemSel = document.getElementById("ammo_item");
+  if (itemSel){
+    const st = loadState();
+    const types = (st.data.ammoTypes || []).map(ammoTypeLabel).filter(Boolean);
+    const existing = (st.data.ammoStock || []).map(x=>x.item).filter(Boolean);
+    const all = Array.from(new Set([...types, ...existing])).sort((a,b)=>a.localeCompare(b));
+    itemSel.innerHTML = (all.length ? `<option value="" disabled selected>Select item</option>` : `<option value="" disabled selected>(Add ammo types in Admin)</option>`)
+      + all.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+  }
+
+  let editIndex = null;
+  const setMode = ()=> document.getElementById("ammo_mode").textContent = "Mode: " + (editIndex===null ? "Add" : "Edit #" + (editIndex+1));
+  const fill = (x)=>{ document.getElementById("ammo_item").value=x?.item||""; document.getElementById("ammo_qty").value=x?.qty ?? ""; document.getElementById("ammo_unit").value=x?.unit||""; document.getElementById("ammo_notes").value=x?.notes||""; };
+
+  document.getElementById("ammo_save").onclick = () => {
+    const item = sanitizeStr(document.getElementById("ammo_item").value);
+    const qty = Number(document.getElementById("ammo_qty").value);
+    const unit = sanitizeStr(document.getElementById("ammo_unit").value) || "rounds";
+    const notes = sanitizeStr(document.getElementById("ammo_notes").value);
+    if (!item){ toast("Item name is required."); return; }
+    if (!Number.isFinite(qty)){ toast("Quantity must be a number."); return; }
+
+    const st = loadState();
+    st.data.ammoStock ||= [];
+    const entry = { item, qty, unit, notes, updatedAt: nowISO() };
+    if (editIndex === null){ entry.createdAt=nowISO(); st.data.ammoStock.push(entry); toast("Ammo item added."); }
+    else { st.data.ammoStock[editIndex] = { ...st.data.ammoStock[editIndex], ...entry, createdAt: st.data.ammoStock[editIndex].createdAt || nowISO() }; toast("Ammo item updated."); }
+
+    st.meta.lastSavedAt = nowISO();
+    saveState(st);
+    editIndex=null;
+    render();
+  };
+  document.getElementById("ammo_clear").onclick = () => { editIndex=null; fill(null); setMode(); };
+
+  document.querySelectorAll("[data-edit-ammo]").forEach(btn=>{
+    btn.onclick = () => { const idx=Number(btn.getAttribute("data-edit-ammo")); const st=loadState(); const x=(st.data.ammoStock||[])[idx]; if(!x) return; editIndex=idx; fill(x); setMode(); toast("Editing ammo item #" + (idx+1)); };
+  });
+  document.querySelectorAll("[data-del-ammo]").forEach(btn=>{
+    btn.onclick = () => { const idx=Number(btn.getAttribute("data-del-ammo")); if(!confirm("Delete this ammo item?")) return; const st=loadState(); st.data.ammoStock.splice(idx,1); saveState(st); toast("Ammo item deleted."); render(); };
+  });
+  setMode();
+}
+
+
+/* Ammo Used (deducts from stock) */
+function normItemName(s){ return sanitizeStr(s).toLowerCase(); }
+
+function ammoTypeLabel(t){
+  const caliber = sanitizeStr(t?.caliber);
+  const grains = sanitizeStr(t?.grains);
+  const type = sanitizeStr(t?.type || t?.name);
+  const parts = [];
+  if (caliber) parts.push(caliber);
+  if (grains) parts.push(grains + "gr");
+  if (type) parts.push(type);
+  return parts.join(" ").trim();
+}
+
+
+function renderAmmoUsed(state, user){
+  const canEdit = hasPerm(user,"edit_ammo_used") || hasPerm(user,"edit_ammo") || hasPerm(user,"admin_access");
+  const usage = state.data.ammoUsage || [];
+  const sorted = usage.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+
+
+  // Quantity remaining per record (reconstructed from current stock + total usage)
+  const stockSnap = (state.data.ammoStock || []).slice();
+  const totalUsedByItem = {};
+  sorted.forEach(r=>{
+    const key = normItemName(r.item);
+    totalUsedByItem[key] = (totalUsedByItem[key] || 0) + (Number(r.qtyUsed) || 0);
+  });
+  const running = {};
+  stockSnap.forEach(s=>{
+    const key = normItemName(s.item);
+    running[key] = (Number(s.qty) || 0) + (totalUsedByItem[key] || 0);
+  });
+  Object.keys(totalUsedByItem).forEach(key=>{
+    if (running[key] === undefined) running[key] = (totalUsedByItem[key] || 0);
+  });
+  const remainingArr = sorted.map(r=>{
+    const key = normItemName(r.item);
+    running[key] = (running[key] || 0) - (Number(r.qtyUsed) || 0);
+    return running[key];
+  });
+
+  const typeItems = (state.data.ammoTypes || []).map(ammoTypeLabel).filter(Boolean);
+  const options = typeItems.length
+    ? typeItems.map(it=> `<option value="${escapeHtml(it)}">${escapeHtml(it)}</option>`).join("")
+    : `<option value="" disabled>(No ammo types yet — add them in Admin)</option>`;
+
+  return `
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h2>Ammo used (auto-deduct)</h2><div class="row"><button class="btn" id="usage_pdf">Generate PDF</button><div class="pill">${sorted.length} record(s)</div></div></div>
+        <div class="bd">
+          ${sorted.length ? `
+            <table class="table">
+              <thead><tr><th>Date</th><th>Used by</th><th>Item</th><th>Qty used</th><th>Quantity remaining</th><th>Notes</th><th style="width:140px">Actions</th></tr></thead>
+              <tbody>
+                ${sorted.map((x,idx)=> `
+                  <tr>
+                    <td class="mono">${escapeHtml(x.date||"—")}</td>
+                    <td class="mono">${escapeHtml(x.usedBy||"—")}</td>
+                    <td>${escapeHtml(x.item||"")}</td>
+                    <td class="mono">${escapeHtml(String(x.qtyUsed ?? ""))} ${escapeHtml(x.unit||"")}</td>
+                    <td class="mono">${escapeHtml(String(remainingArr[idx] ?? ""))} ${escapeHtml(x.unit||"")}</td>
+                    <td class="muted">${escapeHtml(x.notes||"")}</td>
+                    <td>
+                      ${canEdit ? `<button class="btn" data-edit-usage="${idx}">Edit</button> <button class="btn danger" data-del-usage="${idx}">Delete</button>` : `<span class="muted small">Read-only</span>`}
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          ` : `<p class="muted">No ammo usage recorded yet.</p>`}
+
+          <div class="sp"></div>
+          <p class="small muted">Tip: Add ammo types in <b>Ammo Stock</b> first, then record usage here to deduct automatically.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd"><h2>${canEdit ? "Record / edit ammo used" : "No edit permission"}</h2><div class="pill">${canEdit ? "Input tab" : "Read-only"}</div></div>
+        <div class="bd">
+          ${canEdit ? `
+            <div class="field"><label>Date</label><input id="usage_date" type="date" /></div>
+            <div class="field">
+              <label>Ammo item</label>
+              <select id="usage_item">
+                <option value="" ${typeItems.length? "":"selected"} disabled>Select item</option>
+                ${options}
+              </select>
+            </div>
+            <div class="field"><label>Quantity used</label><input id="usage_qty" type="number" min="0" step="1" placeholder="0" /></div>
+            <div class="field">
+              <label>Used by</label>
+              <select id="usage_by"></select>
+            </div>
+            <div class="field"><label>Notes</label><textarea id="usage_notes" placeholder="Training, qual, course, etc…"></textarea></div>
+            <div class="row">
+              <button class="btn primary" id="usage_save">Save</button>
+              <button class="btn" id="usage_clear">Clear</button>
+              <span class="muted small" id="usage_mode">Mode: Add</span>
+            </div>
+          ` : `<p class="muted">You don’t have permission to record ammo used.</p>`}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function wireAmmoUsed(state, user){
+  const canEdit = hasPerm(user,"edit_ammo_used") || hasPerm(user,"edit_ammo") || hasPerm(user,"admin_access");
+  if (!canEdit) return;
+
+  // Populate "Used by" dropdown with all users
+  const byEl = document.getElementById("usage_by");
+  if (byEl){
+    const stUsers = (loadState().users || []).map(u=>u.username);
+    const current = sanitizeStr(loadState().session.currentUser);
+    byEl.innerHTML = stUsers.map(u=>`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join("");
+    byEl.value = current && stUsers.includes(current) ? current : (stUsers[0] || "");
+  }
+
+
+
+  // Download a PDF report (no print dialog, no popups)
+  const pdfBtn = document.getElementById("usage_pdf");
+  if (pdfBtn){
+    pdfBtn.onclick = () => {
+      const st = loadState();
+      const usage = (st.data.ammoUsage || []).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const stock = (st.data.ammoStock || []).slice();
+
+      // Build initial stock (reconstruct) = current stock + total used per item
+      const totalUsedByItem = {};
+      usage.forEach(r=>{
+        const key = normItemName(r.item);
+        totalUsedByItem[key] = (totalUsedByItem[key] || 0) + (Number(r.qtyUsed)||0);
+      });
+
+      const running = {};
+      stock.forEach(s=>{
+        const key = normItemName(s.item);
+        running[key] = (Number(s.qty)||0) + (totalUsedByItem[key] || 0);
+      });
+      // If some usage items aren't in stock array, still include them
+      Object.keys(totalUsedByItem).forEach(key=>{
+        if (running[key] === undefined) running[key] = (totalUsedByItem[key] || 0);
+      });
+
+      // Create rows with remaining stock after each record
+      const rows = usage.map(r=>{
+        const key = normItemName(r.item);
+        const used = Number(r.qtyUsed)||0;
+        running[key] = (running[key] || 0) - used;
+        return {
+          date: r.date || "",
+          usedBy: r.usedBy || "—",
+          item: r.item || "",
+          qtyUsed: used,
+          unit: r.unit || "",
+          remaining: running[key],
+          notes: r.notes || ""
+        };
+      });
+
+      // ---------- Minimal PDF generator (single-page) ----------
+      // Builds a simple text-based PDF with Courier font.
+      function pdfEscape(s){
+        return String(s ?? "").replaceAll("\\","\\\\").replaceAll("(","\\(").replaceAll(")","\\)");
+      }
+      // Draw a clean table-style PDF (PDFs don't support CSS like HTML does).
+      function makePDFTable(title, generatedAt, dataRows){
+        const pageW = 612, pageH = 792;
+        const left = 28, right = 28;
+        const topY = 742;
+        const fontSize = 9;
+        const rowH = 18;
+
+        const tableX = left;
+        const tableW = pageW - left - right;
+
+        // Columns (x positions and widths)
+        const cols = [
+          { key:"date",      label:"Date",               x:left,      w:70 },
+          { key:"usedBy",    label:"Used by",            x:left+70,   w:80 },
+          { key:"item",      label:"Item",               x:left+150,  w:150 },
+          { key:"qtyUsed",   label:"Qty used",           x:left+300,  w:70 },
+          { key:"remaining", label:"Quantity remaining", x:left+370,  w:95 },
+          { key:"notes",     label:"Notes",              x:left+465,  w:(pageW-left-right)-(465-left) }
+        ];
+
+        // Table geometry
+        const headerY = topY - 54;                 // bottom y of header row
+        const maxRows = Math.floor((headerY - 48) / rowH) - 1;
+        const usedRows = Math.min(dataRows.length, Math.max(0, maxRows));
+        const tableH = rowH * (1 + usedRows);      // header + data
+
+        // Keep PDF content ASCII to prevent byte-length issues
+        function safeAscii(s){
+          s = String(s ?? "");
+          let out = "";
+          for (let i=0;i<s.length;i++){
+            const code = s.charCodeAt(i);
+            out += (code >= 32 && code <= 126) ? s[i] : "?";
+          }
+          return out;
+        }
+        function pdfEscape(s){
+          return safeAscii(s)
+            .replaceAll("\\","\\\\")
+            .replaceAll("(","\\(")
+            .replaceAll(")","\\)");
+        }
+        function clipToWidth(val, colW){
+          // Courier is monospaced (~0.6*fontSize per char)
+          const maxChars = Math.max(3, Math.floor(colW / (fontSize * 0.6)) - 1);
+          const s = safeAscii(val);
+          return s.length > maxChars ? s.slice(0, maxChars-3) + "..." : s;
+        }
+
+        // Content stream (vector table)
+        let c = "";
+
+        // Title text
+        c += "0 g\nBT\n";
+        c += "/F1 " + (fontSize+2) + " Tf\n";
+        c += "1 0 0 1 " + left + " " + topY + " Tm\n(" + pdfEscape(title) + ") Tj\n";
+        c += "/F1 " + fontSize + " Tf\n";
+        c += "1 0 0 1 " + left + " " + (topY-16) + " Tm\n(Generated: " + pdfEscape(generatedAt) + ") Tj\n";
+        c += "ET\n";
+
+        // Header background
+        c += "0.93 g\n";
+        c += tableX + " " + headerY + " " + tableW + " " + rowH + " re f\n";
+
+        // Solid stroke lines (no dotted/dashed)
+        c += "[] 0 d\n";
+        c += "0 G\n0.8 w\n";
+
+        // Outer border
+        c += tableX + " " + headerY + " " + tableW + " " + tableH + " re S\n";
+
+        // Vertical grid lines
+        for (let i=1;i<cols.length;i++){
+          const x = cols[i].x;
+          c += x + " " + headerY + " m " + x + " " + (headerY + tableH) + " l S\n";
+        }
+
+        // Horizontal grid lines
+        for (let r=1;r<=usedRows;r++){
+          const y = headerY + rowH * r;
+          c += tableX + " " + y + " m " + (tableX + tableW) + " " + y + " l S\n";
+        }
+
+        // Header labels
+        c += "0 g\nBT\n";
+        c += "/F1 " + fontSize + " Tf\n";
+        for (const col of cols){
+          const tx = col.x + 4;
+          const ty = headerY + 5;
+          c += "1 0 0 1 " + tx + " " + ty + " Tm\n(" + pdfEscape(clipToWidth(col.label, col.w-8)) + ") Tj\n";
+        }
+        c += "ET\n";
+
+        // Data rows text
+        c += "0 g\nBT\n";
+        c += "/F1 " + fontSize + " Tf\n";
+        for (let i=0;i<usedRows;i++){
+          const r = dataRows[i];
+          const y = headerY - rowH * (i+1) + 5;
+          for (const col of cols){
+            const tx = col.x + 4;
+            let val = "";
+            if (col.key === "qtyUsed"){
+              val = String(r.qtyUsed ?? "") + (r.unit ? (" " + r.unit) : "");
+            } else if (col.key === "remaining"){
+              val = String(r.remaining ?? "") + (r.unit ? (" " + r.unit) : "");
+            } else {
+              val = String(r[col.key] ?? "");
+            }
+            c += "1 0 0 1 " + tx + " " + y + " Tm\n(" + pdfEscape(clipToWidth(val, col.w-8)) + ") Tj\n";
+          }
+        }
+        c += "ET\n";
+
+        // Byte-accurate PDF builder
+        const enc = new TextEncoder();
+        const contentLen = enc.encode(c).length;
+
+        const objects = [];
+        objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+        objects[2] = "<< /Type /Pages /Kids [3 0 R] /Count 1 >>";
+        objects[3] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + pageW + " " + pageH + "] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>";
+        objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>";
+        objects[5] = "<< /Length " + contentLen + " >>\nstream\n" + c + "\nendstream";
+
+        const chunks = [];
+        let byteLen = 0;
+        function pushStr(s){
+          const b = enc.encode(s);
+          chunks.push(b);
+          byteLen += b.length;
+        }
+
+        pushStr("%PDF-1.4\n");
+        const offsets = [0,0,0,0,0,0];
+        for (let i=1;i<=5;i++){
+          offsets[i] = byteLen;
+          pushStr(i + " 0 obj\n" + objects[i] + "\nendobj\n");
+        }
+
+        const xrefStart = byteLen;
+        pushStr("xref\n0 6\n");
+        pushStr("0000000000 65535 f \n");
+        for (let i=1;i<=5;i++){
+          pushStr(String(offsets[i]).padStart(10,"0") + " 00000 n \n");
+        }
+        pushStr("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xrefStart + "\n%%EOF");
+
+        return new Blob(chunks, { type: "application/pdf" });
+      }
+          
+
+      const title = "Ammo Used History (with Remaining Stock)";
+      const generatedAt = new Date().toISOString().replace("T"," ").slice(0,19) + "Z";
+
+      // Fixed-width columns (best effort). Courier helps alignment.
+      const header =
+        pad("Date", 10) + " | " +
+        pad("Used by", 10) + " | " +
+        pad("Item", 16) + " | " +
+        pad("Qty used", 10) + " | " +
+        pad("Qty remain", 11) + " | " +
+        pad("Notes", 28) + " | " +
+        pad("Actions", 8);
+
+      const sep = "-".repeat(header.length);
+
+      const lines = [];
+      lines.push(title);
+      lines.push("Generated: " + generatedAt);
+      lines.push("");
+      lines.push(header);
+      lines.push(sep);
+
+      rows.forEach(r=>{
+        const usedStr = `${r.qtyUsed}` + (r.unit ? (" " + r.unit) : "");
+        const remStr  = `${r.remaining}` + (r.unit ? (" " + r.unit) : "");
+        const actions = "Edit/Del";
+        // Notes: keep neat by truncating to fit
+        const notes = (r.notes || "");
+        const line =
+          pad(r.date, 10) + " | " +
+          pad(r.usedBy, 10) + " | " +
+          pad(r.item, 16) + " | " +
+          pad(usedStr, 10) + " | " +
+          pad(remStr, 11) + " | " +
+          pad(notes, 28) + " | " +
+          pad(actions, 8);
+
+        lines.push(line);
+      });
+
+      if (!rows.length){
+        lines.push("(No ammo usage records)");
+      }
+
+      function pad(s, n){
+        s = String(s ?? "");
+        return (s.length > n ? s.slice(0, n-3) + "..." : s).padEnd(n, " ");
+      }
+
+      // Create and download
+      const blob = makePDFTable(title, generatedAt, rows);
+      const filename = `ammo_used_history_${new Date().toISOString().slice(0,10)}.pdf`;
+      downloadBlob(blob, filename);
+      toast("PDF downloaded.");
+    };
+  }
+
+let editIndex = null;
+
+  const setMode = ()=> document.getElementById("usage_mode").textContent =
+    "Mode: " + (editIndex===null ? "Add" : "Edit #" + (editIndex+1));
+
+  const fill = (x)=>{
+    document.getElementById("usage_date").value = x?.date || "";
+    document.getElementById("usage_item").value = x?.item || "";
+    document.getElementById("usage_qty").value = (x?.qtyUsed ?? "");
+    const byEl = document.getElementById("usage_by");
+    if (byEl) byEl.value = x?.usedBy || "";
+    document.getElementById("usage_notes").value = x?.notes || "";
+  };
+
+  function findStockIndexByItem(stockArr, item){
+    const key = normItemName(item);
+    return stockArr.findIndex(s => normItemName(s.item) === key);
+  }
+
+  function applyDeduction(stockArr, item, qtyDelta){
+    // qtyDelta: positive means deduct from stock, negative means add back
+    const idx = findStockIndexByItem(stockArr, item);
+    if (idx < 0) return { ok:false, msg:`Ammo item "${item}" not found in stock. Add it in Ammo Stock first.` };
+    const current = Number(stockArr[idx].qty) || 0;
+    const next = current - qtyDelta;
+    // If next goes negative, ask for confirmation once
+    if (next < 0){
+      const proceed = confirm(`Warning: This will make "${item}" stock negative (${next}). Continue?`);
+      if (!proceed) return { ok:false, msg:"Cancelled." };
+    }
+    stockArr[idx].qty = next;
+    stockArr[idx].updatedAt = nowISO();
+    return { ok:true };
+  }
+
+  document.getElementById("usage_save").onclick = () => {
+    const date = sanitizeStr(document.getElementById("usage_date").value);
+    const item = sanitizeStr(document.getElementById("usage_item").value);
+    const qtyUsed = Number(document.getElementById("usage_qty").value);
+    const usedBy = sanitizeStr(document.getElementById("usage_by")?.value) || sanitizeStr(loadState().session.currentUser);
+    const notes = sanitizeStr(document.getElementById("usage_notes").value);
+
+    if (!date){ toast("Date is required."); return; }
+    if (!item){ toast("Ammo item is required."); return; }
+    if (!Number.isFinite(qtyUsed) || qtyUsed <= 0){ toast("Quantity used must be a positive number."); return; }
+
+    const st = loadState();
+    st.data.ammoUsage ||= [];
+    st.data.ammoStock ||= [];
+
+    if (editIndex === null){
+      // Deduct
+      const res = applyDeduction(st.data.ammoStock, item, qtyUsed);
+      if (!res.ok){ toast(res.msg); return; }
+
+      const stockIdx = st.data.ammoStock.findIndex(s=> normItemName(s.item)===normItemName(item));
+      const unit = st.data.ammoStock[stockIdx]?.unit || "rounds";
+
+      st.data.ammoUsage.push({
+        date, usedBy, item, qtyUsed, unit, notes,
+        createdAt: nowISO(),
+        updatedAt: nowISO()
+      });
+      toast("Ammo usage recorded and deducted.");
+    } else {
+      // Edit: reverse old, apply new
+      const sorted = (st.data.ammoUsage||[]).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const target = sorted[editIndex];
+      const actualIndex = st.data.ammoUsage.indexOf(target);
+      if (actualIndex < 0){ toast("Edit failed (item not found)."); return; }
+
+      const oldQty = Number(target.qtyUsed) || 0;
+      const oldItem = target.item;
+
+      // Add back old (negative delta means add back, so pass qtyDelta = -oldQty? Our applyDeduction expects positive deduct.
+      // We'll implement add back by calling applyDeduction with qtyDelta = -oldQty (since next = current - qtyDelta).
+      let res = applyDeduction(st.data.ammoStock, oldItem, -oldQty);
+      if (!res.ok){ toast(res.msg); return; }
+
+      // Deduct new
+      res = applyDeduction(st.data.ammoStock, item, qtyUsed);
+      if (!res.ok){
+        // rollback: re-deduct old to restore previous state
+        applyDeduction(st.data.ammoStock, oldItem, oldQty);
+        toast(res.msg);
+        return;
+      }
+
+      const stockIdx = st.data.ammoStock.findIndex(s=> normItemName(s.item)===normItemName(item));
+      const unit = st.data.ammoStock[stockIdx]?.unit || (target.unit || "rounds");
+
+      st.data.ammoUsage[actualIndex] = {
+        ...target,
+        date, usedBy, item, qtyUsed, unit, notes,
+        updatedAt: nowISO()
+      };
+      toast("Ammo usage updated and stock adjusted.");
+    }
+
+    st.meta.lastSavedAt = nowISO();
+    saveState(st);
+    editIndex = null;
+    render();
+  };
+
+  document.getElementById("usage_clear").onclick = () => { editIndex=null; fill(null); setMode(); };
+
+  document.querySelectorAll("[data-edit-usage]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-edit-usage"));
+      const st = loadState();
+      const sorted = (st.data.ammoUsage||[]).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const x = sorted[idx];
+      if (!x) return;
+      editIndex = idx;
+      fill(x);
+      setMode();
+      toast("Editing usage record #" + (idx+1));
+    };
+  });
+
+  document.querySelectorAll("[data-del-usage]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-del-usage"));
+      if (!confirm("Delete this usage record and add the ammo back to stock?")) return;
+      const st = loadState();
+      const sorted = (st.data.ammoUsage||[]).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const target = sorted[idx];
+      const actualIndex = (st.data.ammoUsage||[]).indexOf(target);
+      if (actualIndex < 0) return;
+
+      st.data.ammoStock ||= [];
+      const item = target.item;
+      const qty = Number(target.qtyUsed) || 0;
+
+      // Add back to stock
+      const res = (function(){
+        // qtyDelta negative adds back
+        return applyDeduction(st.data.ammoStock, item, -qty);
+      })();
+      if (!res.ok){ toast(res.msg); return; }
+
+      st.data.ammoUsage.splice(actualIndex, 1);
+      st.meta.lastSavedAt = nowISO();
+      saveState(st);
+      toast("Usage deleted and stock restored.");
+      render();
+    };
+  });
+
+  setMode();
+}
+
+/* Courses */
+function renderCourses(state, user){
+  const canEdit = hasPerm(user,"edit_courses") || hasPerm(user,"admin_access");
+  const courses = state.data.courses || [];
+  const sorted = courses.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+  return `
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h2>Upcoming courses</h2><div class="pill">${sorted.length} course(s)</div></div>
+        <div class="bd">
+          ${sorted.length ? `
+            <table class="table">
+              <thead><tr><th>Date</th><th>Course</th><th>Location</th><th>Notes</th><th style="width:140px">Actions</th></tr></thead>
+              <tbody>
+                ${sorted.map((x,idx)=> `
+                  <tr>
+                    <td class="mono">${escapeHtml(x.date||"—")}</td>
+                    <td>${escapeHtml(x.course||"")}</td>
+                    <td class="muted">${escapeHtml(x.location||"")}</td>
+                    <td class="muted">${escapeHtml(x.notes||"")}</td>
+                    <td>
+                      ${canEdit ? `<button class="btn" data-edit-course="${idx}">Edit</button> <button class="btn danger" data-del-course="${idx}">Delete</button>` : `<span class="muted small">Read-only</span>`}
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          ` : `<p class="muted">No courses yet.</p>`}
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>${canEdit ? "Add / edit course" : "No edit permission"}</h2><div class="pill">${canEdit ? "Input tab" : "Read-only"}</div></div>
+        <div class="bd">
+          ${canEdit ? `
+            <div class="field"><label>Date (YYYY-MM-DD)</label><input id="course_date" type="date" /></div>
+            <div class="field"><label>Course name</label><input id="course_name" placeholder="CQB Basics / Sniper Refresher…" /></div>
+            <div class="field"><label>Location</label><input id="course_loc" placeholder="Training Bay / Range B…" /></div>
+            <div class="field"><label>Notes</label><textarea id="course_notes" placeholder="Instructor, kit list, prerequisites…"></textarea></div>
+            <div class="row">
+              <button class="btn primary" id="course_save">Save</button>
+              <button class="btn" id="course_clear">Clear</button>
+              <span class="muted small" id="course_mode">Mode: Add</span>
+            </div>
+          ` : `<p class="muted">You don’t have permission to edit courses.</p>`}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function wireCourses(state, user){
+  const canEdit = hasPerm(user,"edit_courses") || hasPerm(user,"admin_access");
+  if (!canEdit) return;
+  let editIndex=null;
+  const setMode=()=> document.getElementById("course_mode").textContent = "Mode: " + (editIndex===null ? "Add" : "Edit #" + (editIndex+1));
+  const fill=(x)=>{ document.getElementById("course_date").value=x?.date||""; document.getElementById("course_name").value=x?.course||""; document.getElementById("course_loc").value=x?.location||""; document.getElementById("course_notes").value=x?.notes||""; };
+
+  document.getElementById("course_save").onclick = () => {
+    const date=sanitizeStr(document.getElementById("course_date").value);
+    const course=sanitizeStr(document.getElementById("course_name").value);
+    const location=sanitizeStr(document.getElementById("course_loc").value);
+    const notes=sanitizeStr(document.getElementById("course_notes").value);
+    
+    if(!course){ toast("Course name is required."); return; }
+
+    const st=loadState();
+    st.data.courses ||= [];
+    const entry={ date, course, location, notes, updatedAt: nowISO() };
+
+    if(editIndex===null){ entry.createdAt=nowISO(); st.data.courses.push(entry); toast("Course added."); }
+    else{
+      const sorted = st.data.courses.slice().sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+      const target = sorted[editIndex];
+      const actual = st.data.courses.indexOf(target);
+      if(actual>=0) st.data.courses[actual] = { ...target, ...entry, createdAt: target.createdAt || nowISO() };
+      toast("Course updated.");
+    }
+    saveState(st);
+    editIndex=null;
+    render();
+  };
+  document.getElementById("course_clear").onclick = ()=>{ editIndex=null; fill(null); setMode(); };
+
+  document.querySelectorAll("[data-edit-course]").forEach(btn=>{
+    btn.onclick=()=>{ const idx=Number(btn.getAttribute("data-edit-course")); const st=loadState(); const sorted=(st.data.courses||[]).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||"")); const x=sorted[idx]; if(!x) return; editIndex=idx; fill(x); setMode(); toast("Editing course #" + (idx+1)); };
+  });
+  document.querySelectorAll("[data-del-course]").forEach(btn=>{
+    btn.onclick=()=>{ const idx=Number(btn.getAttribute("data-del-course")); if(!confirm("Delete this course?")) return; const st=loadState(); const sorted=(st.data.courses||[]).slice().sort((a,b)=> (a.date||"").localeCompare(b.date||"")); const target=sorted[idx]; const actual=(st.data.courses||[]).indexOf(target); if(actual>=0){ st.data.courses.splice(actual,1); saveState(st); toast("Course deleted."); render(); } };
+  });
+  setMode();
+}
+
+/* Reminders */
+function renderPriorityTag(p){
+  const pr=(p||"Medium").toLowerCase();
+  if(pr==="high") return `<span class="tag bad">High</span>`;
+  if(pr==="low") return `<span class="tag ok">Low</span>`;
+  return `<span class="tag warn">Medium</span>`;
+}
+function renderReminders(state, user){
+  const canEdit = hasPerm(user,"edit_reminders") || hasPerm(user,"admin_access");
+  const reminders = state.data.reminders || [];
+  const sorted = reminders.slice().sort((a,b)=> (a.due||"").localeCompare(b.due||""));
+  return `
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h2>General reminders</h2><div class="pill">${sorted.length} reminder(s)</div></div>
+        <div class="bd">
+          ${sorted.length ? `
+            <table class="table">
+              <thead><tr><th>Due</th><th>Reminder</th><th>Priority</th><th style="width:140px">Actions</th></tr></thead>
+              <tbody>
+                ${sorted.map((x,idx)=> `
+                  <tr>
+                    <td class="mono">${escapeHtml(x.due||"—")}</td>
+                    <td>${escapeHtml(x.text||"")}</td>
+                    <td>${renderPriorityTag(x.priority)}</td>
+                    <td>
+                      ${canEdit ? `<button class="btn" data-edit-rem="${idx}">Edit</button> <button class="btn danger" data-del-rem="${idx}">Delete</button>` : `<span class="muted small">Read-only</span>`}
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          ` : `<p class="muted">No reminders yet.</p>`}
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>${canEdit ? "Add / edit reminder" : "No edit permission"}</h2><div class="pill">${canEdit ? "Input tab" : "Read-only"}</div></div>
+        <div class="bd">
+          ${canEdit ? `
+            <div class="field"><label>Due date (YYYY-MM-DD)</label><input id="rem_due" type="date" /></div>
+            <div class="field"><label>Reminder text</label><textarea id="rem_text" placeholder="What needs doing?"></textarea></div>
+            <div class="field">
+              <label>Priority</label>
+              <select id="rem_pri">
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+            <div class="row">
+              <button class="btn primary" id="rem_save">Save</button>
+              <button class="btn" id="rem_clear">Clear</button>
+              <span class="muted small" id="rem_mode">Mode: Add</span>
+            </div>
+          ` : `<p class="muted">You don’t have permission to edit reminders.</p>`}
+        </div>
+      </div>
+    </div>
+  `;
+}
+function wireReminders(state, user){
+  const canEdit = hasPerm(user,"edit_reminders") || hasPerm(user,"admin_access");
+  if (!canEdit) return;
+  let editIndex=null;
+  const setMode=()=> document.getElementById("rem_mode").textContent = "Mode: " + (editIndex===null ? "Add" : "Edit #" + (editIndex+1));
+  const fill=(x)=>{ document.getElementById("rem_due").value=x?.due||""; document.getElementById("rem_text").value=x?.text||""; document.getElementById("rem_pri").value=x?.priority||"Medium"; };
+
+  document.getElementById("rem_save").onclick=()=>{
+    const due=sanitizeStr(document.getElementById("rem_due").value);
+    const text=sanitizeStr(document.getElementById("rem_text").value);
+    const priority=sanitizeStr(document.getElementById("rem_pri").value)||"Medium";
+    
+    if(!text){ toast("Reminder text is required."); return; }
+
+    const st=loadState();
+    st.data.reminders ||= [];
+    const entry={ due, text, priority, updatedAt: nowISO() };
+    if(editIndex===null){ entry.createdAt=nowISO(); st.data.reminders.push(entry); toast("Reminder added."); }
+    else{
+      const sorted = st.data.reminders.slice().sort((a,b)=> (a.due||"").localeCompare(b.due||""));
+      const target = sorted[editIndex];
+      const actual = st.data.reminders.indexOf(target);
+      if(actual>=0) st.data.reminders[actual] = { ...target, ...entry, createdAt: target.createdAt || nowISO() };
+      toast("Reminder updated.");
+    }
+    saveState(st);
+    editIndex=null;
+    render();
+  };
+  document.getElementById("rem_clear").onclick=()=>{ editIndex=null; fill(null); setMode(); };
+
+  document.querySelectorAll("[data-edit-rem]").forEach(btn=>{
+    btn.onclick=()=>{ const idx=Number(btn.getAttribute("data-edit-rem")); const st=loadState(); const sorted=(st.data.reminders||[]).slice().sort((a,b)=> (a.due||"").localeCompare(b.due||"")); const x=sorted[idx]; if(!x) return; editIndex=idx; fill(x); setMode(); toast("Editing reminder #" + (idx+1)); };
+  });
+  document.querySelectorAll("[data-del-rem]").forEach(btn=>{
+    btn.onclick=()=>{ const idx=Number(btn.getAttribute("data-del-rem")); if(!confirm("Delete this reminder?")) return; const st=loadState(); const sorted=(st.data.reminders||[]).slice().sort((a,b)=> (a.due||"").localeCompare(b.due||"")); const target=sorted[idx]; const actual=(st.data.reminders||[]).indexOf(target); if(actual>=0){ st.data.reminders.splice(actual,1); saveState(st); toast("Reminder deleted."); render(); } };
+  });
+  setMode();
+}
+
+/* Admin */
+function renderAdmin(state, user){
+  if (!hasPerm(user,"admin_access")){
+    return `<div class="card"><div class="hd"><h2>Admin</h2><div class="pill">Access denied</div></div><div class="bd"><p class="muted">You do not have admin access.</p></div></div>`;
+  }
+  const users = state.users || [];
+  const roleNames = getRoleNames(state);
+
+  const dataCounts = [
+    ["Range bookings", (state.data.rangeBookings||[]).length],
+    ["Ammo items", (state.data.ammoStock||[]).length],
+    ["Courses", (state.data.courses||[]).length],
+    ["Reminders", (state.data.reminders||[]).length]
+  ];
+  return `
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h2>Admin controls</h2><div class="pill">${users.length} user(s)</div></div>
+        <div class="bd">
+          <div class="kpi">
+            ${dataCounts.map(([k,v])=> `<div class="box"><div class="label">${escapeHtml(k)}</div><div class="value">${escapeHtml(String(v))}</div></div>`).join("")}
+          </div>
+          <div class="hr"></div>
+          <div class="row" style="justify-content:space-between;">
+            <div>
+              <div class="muted">Quick actions</div>
+              <div class="small">Manage users, roles, permissions, and all data sets.</div>
+            </div>
+            <div class="row">
+              <button class="btn danger" id="wipeData">Wipe ALL data (keep users)</button>
+              <button class="btn danger" id="factoryReset">Factory reset (restore admin only)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="card">
+        <div class="hd"><h2>Ammo types</h2><div class="pill">Dropdown master list</div></div>
+        <div class="bd">
+          <div class="small muted">Add ammo types here so Ammo Stock and Ammo Used can use dropdowns (no typing).</div>
+          <div class="sp"></div>
+
+          <table class="table">
+            <thead><tr><th>Caliber</th><th>Grains</th><th>Type</th><th>Label</th><th style="width:140px">Actions</th></tr></thead>
+            <tbody>
+              ${(state.data.ammoTypes||[]).map((t,idx)=> `
+                <tr>
+                  <td class="mono">${escapeHtml(t.caliber||"")}</td>
+                  <td class="mono">${escapeHtml(String(t.grains ?? ""))}</td>
+                  <td>${escapeHtml(t.type||"")}</td>
+                  <td class="muted">${escapeHtml(ammoTypeLabel(t))}</td>
+                  <td>
+                    <button class="btn" data-edit-at="${idx}">Edit</button>
+                    <button class="btn danger" data-del-at="${idx}">Delete</button>
+                  </td>
+                </tr>
+              `).join("") || `<tr><td colspan="5" class="muted">No ammo types yet.</td></tr>`}
+            </tbody>
+          </table>
+
+          <div class="sp"></div>
+          <div class="hr"></div>
+
+          <div class="field"><label>Caliber</label><input id="at_caliber" placeholder="e.g., 9mm / 5.56 / .308" /></div>
+          <div class="field"><label>Grains</label><input id="at_grains" type="number" min="0" step="1" placeholder="e.g., 124" /></div>
+          <div class="field"><label>Type</label><input id="at_type" placeholder="e.g., FMJ / JHP / Match" /></div>
+
+          <div class="row">
+            <button class="btn primary" id="at_save">Save</button>
+            <button class="btn" id="at_clear">Clear</button>
+            <span class="muted small" id="at_mode">Mode: Add</span>
+          </div>
+        </div>
+      </div>
+
+
+      
+      <div class="card">
+        <div class="hd"><h2>Roles</h2><div class="pill">Create & manage</div></div>
+        <div class="bd">
+          <div class="small muted">Roles are templates. Assign a role to a user, then optionally apply role defaults to set their permissions.</div>
+          <div class="sp"></div>
+
+          <table class="table">
+            <thead><tr><th>Role</th><th>Default permissions</th><th style="width:140px">Actions</th></tr></thead>
+            <tbody>
+              ${(state.roles||[]).map((r,idx)=> `
+                <tr>
+                  <td class="mono">${escapeHtml(r.name||"")}</td>
+                  <td>
+                    ${PERMISSIONS.map(p=>{
+                      const checked = !!r.permissions?.[p.key];
+                      return `
+                        <label class="tag" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                          <input type="checkbox" data-role-perm="${idx}:${p.key}" ${checked?"checked":""}/>
+                          <span>${escapeHtml(p.label)}</span>
+                        </label>
+                      `;
+                    }).join("")}
+                  </td>
+                  <td>
+                    ${r.name==="Admin" ? `<span class="muted small">Protected</span>` : `
+                      <button class="btn" data-edit-role="${idx}">Edit</button>
+                      <button class="btn danger" data-del-role="${idx}">Delete</button>
+                    `}
+                  </td>
+                </tr>
+              `).join("") || `<tr><td colspan="3" class="muted">No roles yet.</td></tr>`}
+            </tbody>
+          </table>
+
+          <div class="sp"></div>
+          <div class="hr"></div>
+
+          <div class="field"><label>Role name</label><input id="role_name" placeholder="e.g., Range Officer" /></div>
+          <div class="small muted">Choose default permissions for this role:</div>
+          <div class="sp"></div>
+          ${PERMISSIONS.map(p=> `
+            <div class="checkbox">
+              <input type="checkbox" id="role_${p.key}" />
+              <div><div>${escapeHtml(p.label)}</div><div class="small muted mono">${escapeHtml(p.key)}</div></div>
+            </div>
+          `).join("")}
+
+          <div class="row">
+            <button class="btn primary" id="role_save">Save role</button>
+            <button class="btn" id="role_clear">Clear</button>
+            <span class="muted small" id="role_mode">Mode: Add</span>
+          </div>
+        </div>
+      </div>
+
+<div class="card">
+        <div class="hd"><h2>Create user</h2><div class="pill">Users & roles</div></div>
+        <div class="bd">
+          <div class="field"><label>Username</label><input id="nu_user" placeholder="e.g., john" /></div>
+          <div class="field"><label>Password</label><input id="nu_pass" type="password" placeholder="Set password" /></div>
+          <div class="field"><label>Display name (optional)</label><input id="nu_disp" placeholder="e.g., John Doe" /></div>
+          <div class="field"><label>Role</label>
+            <select id="nu_role"></select>
+          </div>
+
+          <div class="field">
+            <label>Default permissions</label>
+            <div class="small muted">Tip: you can fine-tune per-user below.</div>
+            ${PERMISSIONS.map(p=> `
+              <div class="checkbox">
+                <input type="checkbox" id="nu_${p.key}" ${p.key==="view_dashboard" ? "checked":""} />
+                <div><div>${escapeHtml(p.label)}</div><div class="small muted mono">${escapeHtml(p.key)}</div></div>
+              </div>
+            `).join("")}
+          </div>
+          <button class="btn primary" id="createUser">Create user</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sp"></div>
+
+    <div class="card">
+      <div class="hd"><h2>Manage users, roles & permissions</h2><div class="pill">Per-user settings</div></div>
+      <div class="bd">
+        <table class="table">
+          <thead><tr><th>Username</th><th>Display</th><th>Role</th><th>Permissions</th><th style="width:170px">Actions</th></tr></thead>
+          <tbody>
+            ${users.map((u,i)=> `
+              <tr>
+                <td class="mono">${escapeHtml(u.username)}</td>
+                <td>${escapeHtml(u.displayName||"")}</td>
+                <td>
+                  ${u.username==="warren" ? `<span class="tag ok">Admin (fixed)</span>` : `
+                    <select data-user-role="${i}">${roleNames.map(r=> `<option ${u.role===r?"selected":""}>${escapeHtml(r)}</option>`).join("")}</select>
+                    <div class="sp"></div>
+                    <button class="btn" data-apply-role="${i}" title="Apply the role template permissions to this user (overwrites their current permission toggles)">Apply role defaults</button>
+                  `}
+                </td>
+                <td>
+                  ${PERMISSIONS.map(p=>{
+                    const checked = !!u.permissions?.[p.key];
+                    const disabled = (u.username==="warren") ? "disabled" : "";
+                    return `
+                      <label class="tag" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" data-user-perm="${i}:${p.key}" ${checked?"checked":""} ${disabled}/>
+                        <span>${escapeHtml(p.label)}</span>
+                      </label>
+                    `;
+                  }).join("")}
+                </td>
+                <td>
+                  ${u.username==="warren" ? `<span class="muted small">Protected</span>` : `
+                    <button class="btn" data-user-pass="${i}">Set password</button>
+                    <button class="btn danger" data-user-del="${i}">Delete</button>
+                  `}
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sp"></div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="hd"><h2>Admin data editor</h2><div class="pill">All datasets</div></div>
+        <div class="bd">
+          <p class="muted">Edit data using the dedicated tabs:</p>
+          <div class="row">
+            <button class="btn" data-admin-goto="range">Range tab</button>
+            <button class="btn" data-admin-goto="ammo">Ammo tab</button>
+            <button class="btn" data-admin-goto="ammo_used">Ammo Used tab</button>
+            <button class="btn" data-admin-goto="courses">Courses tab</button>
+            <button class="btn" data-admin-goto="reminders">Reminders tab</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><h2>Security note</h2><div class="pill">Client-only</div></div>
+        <div class="bd">
+          <p class="small muted">Data is synced to <span class="mono">Supabase</span> (Apps Script backend) with a local cache for offline use. Login/permissions are still handled in the browser in this single-file build; for true security and audited access, move authentication server-side.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function wireAdmin(){
+  const st0 = loadState();
+  const me = getCurrentUser(st0);
+  if (!hasPerm(me,"admin_access")) return;
+
+
+  // ----- ROLE CRUD -----
+  // Populate role dropdowns (Create user + user rows) from stored roles
+  const refreshRoleSelects = ()=>{
+    const st = loadState();
+    const roleNames = getRoleNames(st);
+    const nuRole = document.getElementById("nu_role");
+    if (nuRole){
+      nuRole.innerHTML = roleNames.map(r=>`<option>${escapeHtml(r)}</option>`).join("");
+      // Keep existing selection if possible
+      const cur = sanitizeStr(nuRole.value);
+      if (cur && roleNames.includes(cur)) nuRole.value = cur;
+    }
+    document.querySelectorAll("[data-user-role]").forEach(sel=>{
+      const idx = Number(sel.getAttribute("data-user-role"));
+      const u = (st.users||[])[idx];
+      const current = sanitizeStr(u?.role) || roleNames[0] || "";
+      sel.innerHTML = roleNames.map(r=>`<option ${r===current?"selected":""}>${escapeHtml(r)}</option>`).join("");
+    });
+  };
+  refreshRoleSelects();
+
+  // Role add/edit form
+  let roleEditIndex = null;
+  const roleModeEl = document.getElementById("role_mode");
+  const setRoleMode = ()=> { if(roleModeEl) roleModeEl.textContent = "Mode: " + (roleEditIndex===null ? "Add" : "Edit #" + (roleEditIndex+1)); };
+
+  const roleFill = (r)=>{
+    document.getElementById("role_name").value = r?.name || "";
+    PERMISSIONS.forEach(p=>{
+      const el = document.getElementById("role_" + p.key);
+      if (el) el.checked = !!r?.permissions?.[p.key];
+    });
+  };
+  const roleClear = ()=>{
+    roleEditIndex = null;
+    roleFill({name:"", permissions:{}});
+    setRoleMode();
+  };
+
+  const roleSaveBtn = document.getElementById("role_save");
+  if (roleSaveBtn){
+    roleSaveBtn.onclick = ()=>{
+      const name = sanitizeStr(document.getElementById("role_name").value);
+      if (!name){ toast("Role name is required."); return; }
+      if (name.toLowerCase() === "admin"){ toast('Role name "Admin" is reserved.'); return; }
+
+      const st = loadState();
+      normalizeRoles(st);
+      const perms = {};
+      PERMISSIONS.forEach(p=>{
+        perms[p.key] = !!document.getElementById("role_" + p.key)?.checked;
+      });
+
+      // Prevent duplicates (case-insensitive)
+      const existsIdx = (st.roles||[]).findIndex(r=> (r.name||"").toLowerCase() === name.toLowerCase());
+
+      if (roleEditIndex === null){
+        if (existsIdx >= 0){ toast("That role already exists."); return; }
+        st.roles.push({ name, permissions: perms });
+        saveState(st);
+        toast("Role created.");
+      } else {
+        const target = st.roles[roleEditIndex];
+        if (!target){ toast("Role not found."); return; }
+        // If renaming, ensure no collision
+        if (existsIdx >= 0 && existsIdx !== roleEditIndex){ toast("That role already exists."); return; }
+        st.roles[roleEditIndex] = { ...target, name, permissions: perms };
+        // Update any users using old name
+        (st.users||[]).forEach(u=>{ if (u.role === target.name) u.role = name; });
+        saveState(st);
+        toast("Role updated.");
+      }
+      roleClear();
+      render();
+    };
+  }
+  const roleClearBtn = document.getElementById("role_clear");
+  if (roleClearBtn) roleClearBtn.onclick = roleClear;
+
+  document.querySelectorAll("[data-edit-role]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const idx = Number(btn.getAttribute("data-edit-role"));
+      const st = loadState();
+      normalizeRoles(st);
+      const r = (st.roles||[])[idx];
+      if (!r) return;
+      roleEditIndex = idx;
+      roleFill(r);
+      setRoleMode();
+      toast("Editing role #" + (idx+1));
+    };
+  });
+  document.querySelectorAll("[data-del-role]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const idx = Number(btn.getAttribute("data-del-role"));
+      const st = loadState();
+      normalizeRoles(st);
+      const r = (st.roles||[])[idx];
+      if (!r) return;
+      if (r.name === "Admin"){ toast("Admin role is protected."); return; }
+      const inUse = (st.users||[]).some(u=> u.role === r.name);
+      if (inUse){
+        if (!confirm(`Role "${r.name}" is assigned to one or more users. Delete anyway?`)) return;
+      } else {
+        if (!confirm(`Delete role "${r.name}"?`)) return;
+      }
+      st.roles.splice(idx,1);
+      saveState(st);
+      toast("Role deleted.");
+      render();
+    };
+  });
+
+  // Inline role permission toggles in the roles table
+  document.querySelectorAll("[data-role-perm]").forEach(ch=>{
+    ch.onchange = ()=>{
+      const [idxStr, key] = ch.getAttribute("data-role-perm").split(":");
+      const idx = Number(idxStr);
+      const st = loadState();
+      normalizeRoles(st);
+      const r = (st.roles||[])[idx];
+      if (!r) return;
+      r.permissions ||= {};
+      r.permissions[key] = !!ch.checked;
+      saveState(st);
+      toast("Role defaults updated.");
+    };
+  });
+
+  // Apply role defaults to a user (overwrites user's permission toggles)
+  document.querySelectorAll("[data-apply-role]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const idx = Number(btn.getAttribute("data-apply-role"));
+      const st = loadState();
+      normalizeRoles(st);
+      const u = (st.users||[])[idx];
+      if (!u) return;
+      const role = getRoleByName(st, u.role);
+      if (!role){ toast("Role not found."); return; }
+      if (!confirm(`Apply "${role.name}" default permissions to ${u.username}? This will overwrite their current permission toggles.`)) return;
+      u.permissions = { ...u.permissions, ...role.permissions };
+      // If role implies admin_access true, keep it; if false, keep explicit user admin_access as is unless role sets it
+      saveState(st);
+      toast("Role defaults applied.");
+      render();
+    };
+  });
+
+  // Ammo Types CRUD (dropdown master list)
+  let atEditIndex = null;
+  const atModeEl = document.getElementById("at_mode");
+  const setAtMode = ()=> { if(atModeEl) atModeEl.textContent = "Mode: " + (atEditIndex===null ? "Add" : "Edit #" + (atEditIndex+1)); };
+  const atFill = (t)=>{
+    const cal=document.getElementById("at_caliber"); if(cal) cal.value = t?.caliber || "";
+    const gr=document.getElementById("at_grains"); if(gr) gr.value = (t?.grains ?? "");
+    const ty=document.getElementById("at_type"); if(ty) ty.value = t?.type || "";
+  };
+
+  const atSave = document.getElementById("at_save");
+  if (atSave){
+    atSave.onclick = () => {
+      const caliber = sanitizeStr(document.getElementById("at_caliber")?.value);
+      const grainsRaw = document.getElementById("at_grains")?.value;
+      const grains = grainsRaw === "" ? "" : Number(grainsRaw);
+      const type = sanitizeStr(document.getElementById("at_type")?.value);
+
+      if (!caliber){ toast("Caliber is required."); return; }
+      if (grainsRaw !== "" && !Number.isFinite(grains)){ toast("Grains must be a number."); return; }
+      if (!type){ toast("Type is required."); return; }
+
+      const st = loadState();
+      st.data.ammoTypes ||= [];
+      const entry = { caliber, grains: (grainsRaw===""? "" : grains), type, updatedAt: nowISO() };
+
+      if (atEditIndex === null){
+        entry.createdAt = nowISO();
+        st.data.ammoTypes.push(entry);
+        toast("Ammo type added.");
+      } else {
+        const t = st.data.ammoTypes[atEditIndex];
+        if (!t){ toast("Edit failed."); return; }
+        st.data.ammoTypes[atEditIndex] = { ...t, ...entry, createdAt: t.createdAt || nowISO() };
+        toast("Ammo type updated.");
+      }
+
+      saveState(st);
+      atEditIndex = null;
+      render();
+    };
+  }
+
+  const atClear = document.getElementById("at_clear");
+  if (atClear){
+    atClear.onclick = () => { atEditIndex = null; atFill(null); setAtMode(); };
+  }
+
+  document.querySelectorAll("[data-edit-at]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-edit-at"));
+      const st = loadState();
+      const t = (st.data.ammoTypes || [])[idx];
+      if (!t) return;
+      atEditIndex = idx;
+      atFill(t);
+      setAtMode();
+      toast("Editing ammo type #" + (idx+1));
+    };
+  });
+
+  document.querySelectorAll("[data-del-at]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-del-at"));
+      if (!confirm("Delete this ammo type?")) return;
+      const st = loadState();
+      st.data.ammoTypes ||= [];
+      if (idx >= 0 && idx < st.data.ammoTypes.length){
+        st.data.ammoTypes.splice(idx, 1);
+        saveState(st);
+        toast("Ammo type deleted.");
+        render();
+      }
+    };
+  });
+
+  setAtMode();
+
+
+  document.getElementById("createUser").onclick = () => {
+    const username = sanitizeStr(document.getElementById("nu_user").value).toLowerCase();
+    const password = sanitizeStr(document.getElementById("nu_pass").value);
+    const displayName = sanitizeStr(document.getElementById("nu_disp").value);
+    const role = sanitizeStr(document.getElementById("nu_role").value) || ROLES[0];
+    if (!username){ toast("Username is required."); return; }
+    if (!password){ toast("Password is required."); return; }
+
+    const st = loadState();
+    if (st.users.some(u=>u.username===username)){ toast("That username already exists."); return; }
+
+    const perms = {};
+    PERMISSIONS.forEach(p=> perms[p.key] = !!document.getElementById("nu_" + p.key)?.checked);
+    st.users.push({ username, password, displayName, role, permissions: perms });
+    saveState(st);
+    toast("User created.");
+    render();
+  };
+
+  document.querySelectorAll("[data-user-role]").forEach(sel=>{
+    sel.onchange = () => {
+      const idx = Number(sel.getAttribute("data-user-role"));
+      const st = loadState();
+      if (!st.users[idx]) return;
+      st.users[idx].role = sel.value;
+      saveState(st);
+      toast("Role updated.");
+    };
+  });
+
+  document.querySelectorAll("[data-user-perm]").forEach(chk=>{
+    chk.onchange = () => {
+      const [idxStr, key] = chk.getAttribute("data-user-perm").split(":");
+      const idx = Number(idxStr);
+      const st = loadState();
+      const u = st.users[idx];
+      if (!u) return;
+      u.permissions ||= {};
+      u.permissions[key] = chk.checked;
+      saveState(st);
+      toast("Permission updated.");
+      if (u.username === st.session.currentUser) render();
+    };
+  });
+
+  document.querySelectorAll("[data-user-pass]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-user-pass"));
+      const newPass = prompt("Enter a new password for this user:");
+      if (newPass === null) return;
+      const pass = sanitizeStr(newPass);
+      if (!pass){ toast("Password not changed."); return; }
+      const st = loadState();
+      if (!st.users[idx]) return;
+      st.users[idx].password = pass;
+      saveState(st);
+      toast("Password updated.");
+    };
+  });
+
+  document.querySelectorAll("[data-user-del]").forEach(btn=>{
+    btn.onclick = () => {
+      const idx = Number(btn.getAttribute("data-user-del"));
+      const st = loadState();
+      const u = st.users[idx];
+      if (!u) return;
+      if (!confirm(`Delete user "${u.username}"?`)) return;
+      const isCurrent = st.session.currentUser === u.username;
+      st.users.splice(idx, 1);
+      if (isCurrent) st.session.currentUser = null;
+      saveState(st);
+      toast("User deleted.");
+      render();
+    };
+  });
+
+  document.getElementById("wipeData").onclick = () => {
+    if (!confirm("Wipe ALL data (range bookings, ammo, courses, reminders) but keep users?")) return;
+    const st = loadState();
+    st.data = { rangeBookings:[], ammoStock:[], ammoUsage:[], courses:[], reminders:[] };
+    st.meta.lastSavedAt = nowISO();
+    saveState(st);
+    toast("Data wiped.");
+    render();
+  };
+
+  document.getElementById("factoryReset").onclick = () => {
+    if (!confirm("Factory reset will restore ONLY the admin user (warren/warren) and delete all data. Continue?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    seedIfNeeded();
+    toast("Factory reset complete.");
+    render();
+  };
+
+  document.querySelectorAll("[data-admin-goto]").forEach(btn=>{
+    btn.onclick = () => {
+      const tab = btn.getAttribute("data-admin-goto");
+      const st = loadState();
+      st.session.activeTab = tab;
+      saveState(st);
+      render();
+    };
+  });
+}
+
+// Boot
+(async ()=>{
+  // Render immediately (local mode), then attempt remote sync in the background.
+  try { render(); } catch(_){}
+  try{
+    await bootstrapRemoteState();
+    render();
+  }catch(e){
+
+    console.error("Init error:", e);
+    mount(`
+      <div class="login-shell">
+        <div class="card">
+          <div class="hd">
+            <div class="brand">
+              <div class="logo"></div>
+              <div>
+                <h1>Range Ops Portal</h1>
+                <small class="muted">Initialization fallback</small>
+              </div>
+            </div>
+          </div>
+          <div class="bd">
+            <p class="muted">The app hit an initialization error (often a blocked network request). You can still continue using local mode.</p>
+            <div class="hr"></div>
+            <button class="btn primary" id="continueLocal">Continue (Local Mode)</button>
+            <div class="footer-note">
+              Tip: If you want Sheets mode, open DevTools → Console and check for a fetch/CORS error, then ensure your Apps Script deployment access is set to <span class="mono">Anyone with the link</span>.
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+    const btn = document.getElementById("continueLocal");
+    if (btn){
+      btn.onclick = ()=>{
+        try { render(); } catch(err){ console.error(err); }
+      };
+    }
+  }
+})();
+</script>
+</body>
+</html>
