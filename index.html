@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SIU Sniper Forum – Supabase Only</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Supabase JS (self-hosted in repo root) -->
+  <script src="./supabase.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0b0f14;
+      color: #fff;
+    }
+    .container {
+      max-width: 420px;
+      margin: 80px auto;
+      padding: 24px;
+      background: #121826;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.4);
+    }
+    h1 {
+      margin-top: 0;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 16px;
+      font-size: 14px;
+      opacity: .85;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+    }
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .error {
+      margin-top: 16px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255,0,0,.12);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Login</h1>
+
+    <label>Email</label>
+    <input id="email" type="email" />
+
+    <label>Password</label>
+    <input id="password" type="password" />
+
+    <button id="loginBtn">Sign In</button>
+
+    <div id="errorBox" class="error"></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://fmlyoafhrfufzoycsntr.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtbHlvYWZocmZ1ZnpveWNzbnRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MDc1MTMsImV4cCI6MjA4MzI4MzUxM30.nG9crBrAghBJMDv8tPJRMoEXYFEisF5W-z6wnJsISMc";
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const errorBox = document.getElementById("errorBox");
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = "block";
+    }
+
+    document.getElementById("loginBtn").onclick = async () => {
+      errorBox.style.display = "none";
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!email || !password) {
+        showError("Email and password required.");
+        return;
+      }
+
+      const { data, error } = await sb.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        showError(error.message);
+        return;
+      }
+
+      alert("Login successful");
+    };
+  </script>
+
+</body>
+</html>
